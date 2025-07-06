@@ -2,6 +2,9 @@ import React, { useMemo, useState, useContext } from "react";
 import { useGroups } from "../GroupsContext";
 import GroupLeaderboard from "./GroupLeaderboard";
 import { useTheme } from "../theme";
+import AddExpenseModal from "../components/AddExpenseModal";
+import { FAB } from "../components/FAB";
+import { FaPlus } from "react-icons/fa";
 
 // Utility to format datetime strings
 function formatTimestamp(ts) {
@@ -9,8 +12,6 @@ function formatTimestamp(ts) {
   const d = new Date(ts);
   return d.toLocaleString();
 }
-
-
 
 // PUBLIC_INTERFACE
 export default function GroupDashboard({ groupId, onBack }) {
@@ -22,6 +23,17 @@ export default function GroupDashboard({ groupId, onBack }) {
   } = useGroups();
   const group = getGroupById(groupId);
   const members = group ? group.members : [];
+
+  // State: show add-expense modal
+  const [showAddExpense, setShowAddExpense] = useState(false);
+
+  // Handler for adding an expense via modal
+  function handleAddExpense(expense) {
+    // expense: {title, amount, payer, date, splitWith, annotator}
+    // We ignore annotator for backend but could log it
+    addExpense(groupId, expense);
+    setShowAddExpense(false);
+  }
 
   // Payment settlement log for this group (array of {from, to, amount, timestamp})
   // Persist per group, volatile only for demo purposes (refresh = gone)
@@ -137,6 +149,30 @@ export default function GroupDashboard({ groupId, onBack }) {
 
       <h3 style={{ marginTop: "2rem" }}>Expenses</h3>
       <ExpenseList expenses={group.expenses} members={members} />
+
+      {/* Add FAB for "Add Expense" */}
+      <FAB
+        icon={<FaPlus />}
+        label="Add Expense"
+        onClick={() => setShowAddExpense(true)}
+        style={{
+          position: "fixed",
+          bottom: "2.1rem",
+          right: "2.1rem",
+          zIndex: 2100,
+        }}
+        data-testid="add-expense-fab"
+      />
+
+      {/* Add Expense Modal */}
+      <AddExpenseModal
+        members={members}
+        currentUserId={currentUserId}
+        open={showAddExpense}
+        onClose={() => setShowAddExpense(false)}
+        onSubmit={handleAddExpense}
+      />
+
       <h3 style={{ marginTop: "2rem" }}>Balances</h3>
       <BalancesView
         balances={balances}
@@ -158,6 +194,10 @@ export default function GroupDashboard({ groupId, onBack }) {
             right: 8px !important;
             gap: 9px !important;
           }
+          .sq-fab {
+            right: 1rem !important;
+            bottom: 1.1rem !important;
+          }
         }
         @media (max-width: 420px) {
           .sq-action-buttons {
@@ -169,8 +209,6 @@ export default function GroupDashboard({ groupId, onBack }) {
     </div>
   );
 }
-
-
 
 /**
  * Expense history list with details.
