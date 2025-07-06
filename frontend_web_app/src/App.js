@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 import { ThemeProvider, useTheme } from './theme';
 import Sidebar from './components/Sidebar';
 import { GroupsProvider } from './GroupsContext';
@@ -57,22 +58,34 @@ function App() {
    * All main routes and navigation.
    */
   return (
-    <ThemeProvider>
-      <GroupsProvider>
-        <Router>
-          <Routes>
-            {/* Auth page as root route when not logged in */}
-            <Route path="/auth/*" element={
-              <React.Suspense fallback={<div>Loading...</div>}>
-                <Auth />
-              </React.Suspense>
-            }/>
-            {/* All other pages use main layout */}
-            <Route path="/*" element={<MainLayout />} />
-          </Routes>
-        </Router>
-      </GroupsProvider>
-    </ThemeProvider>
+    <>
+      <Helmet>
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true"/>
+        <link href="https://fonts.googleapis.com/css?family=Baloo+2:700&display=swap" rel="stylesheet"/>
+        <link href="https://fonts.googleapis.com/css?family=Nunito:400,600&display=swap" rel="stylesheet"/>
+        <style>{`
+          body, html, #root {
+            font-family: 'Nunito', 'Segoe UI', 'Roboto', Arial, sans-serif;
+          }
+        `}</style>
+      </Helmet>
+      <ThemeProvider>
+        <GroupsProvider>
+          <Router>
+            <Routes>
+              {/* Auth page as root route when not logged in */}
+              <Route path="/auth/*" element={
+                <React.Suspense fallback={<div>Loading...</div>}>
+                  <Auth />
+                </React.Suspense>
+              }/>
+              {/* All other pages use main layout */}
+              <Route path="/*" element={<MainLayout />} />
+            </Routes>
+          </Router>
+        </GroupsProvider>
+      </ThemeProvider>
+    </>
   );
 }
 
