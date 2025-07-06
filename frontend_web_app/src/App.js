@@ -41,6 +41,7 @@ function MainLayout() {
           <Routes>
             <Route path="/" element={<Groups />} />
             <Route path="/groups/*" element={<Groups />} />
+            <Route path="/expenses" element={React.createElement(require('./pages/Expenses').default)} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/notifications" element={<Notifications />} />
