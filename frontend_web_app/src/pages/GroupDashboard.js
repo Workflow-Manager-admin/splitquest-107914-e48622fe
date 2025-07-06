@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useGroups } from "../GroupsContext";
 import ReceiptScanner from "./ReceiptScanner";
+import GroupLeaderboard from "./GroupLeaderboard";
 
 // PUBLIC_INTERFACE
 export default function GroupDashboard({ groupId, onBack }) {
@@ -51,6 +52,10 @@ export default function GroupDashboard({ groupId, onBack }) {
           </span>
         ))}
       </div>
+
+      {/* === New Leaderboard integration === */}
+      <GroupLeaderboard group={group} members={members} balances={balances} />
+
       <div>
         <div style={{ display: "flex", gap: "1rem", marginBottom: 20 }}>
           <button
