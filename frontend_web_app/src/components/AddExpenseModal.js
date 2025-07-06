@@ -41,6 +41,9 @@ export default function AddExpenseModal({
   // Utility to get member object/name by id
   const getName = (id) => members.find((m) => m.id === id)?.name || id;
 
+  // Remove any legacy bottom drawer logic – force true center modal. 
+  // The root modal uses .sq-modal-outer to always center with backdrop.
+
   // Handle checkbox toggle for splitting
   function handleSplitMemberToggle(id) {
     setSplitMembers((prev) =>
@@ -103,18 +106,20 @@ export default function AddExpenseModal({
 
   // Simple inline modal style
   return (
-    <div className={`sq-modal-outer ${animClass}`} tabIndex={-1}>
+    <div className={`sq-modal-outer ${animClass}`} tabIndex={-1} aria-modal="true" role="dialog">
+      {/* Centered, always fixed backdrop layered below the modal */}
       <div className="sq-modal-backdrop" onClick={handleClose} />
       <form
-        className="sq-form-card"
+        className="sq-form-card sq-modal-content"
         style={{
           position: "fixed",
           top: "50%",
           left: "50%",
-          width: 340,
-          maxWidth: "97vw",
+          width: "100%",
+          maxWidth: 380,
+          minWidth: 0,
           transform: "translate(-50%,-50%)",
-          zIndex: 2200,
+          zIndex: 2210,
           background: "#fff",
           borderRadius: 18,
           padding: "2.1rem 1.6rem 1.6rem 1.6rem",
@@ -130,6 +135,7 @@ export default function AddExpenseModal({
         role="dialog"
         onSubmit={handleSubmit}
         autoComplete="off"
+        tabIndex={0}
       >
         <h3
           className="sq-header"
@@ -297,25 +303,53 @@ export default function AddExpenseModal({
           </button>
         </div>
       </form>
-      {/* Modal and fade backdrop */}
       <style>{`
         .sq-modal-outer {
-          z-index:2200;
-          position:fixed;
-          inset:0;
-          display:flex;
-          justify-content:center;
-          align-items:center;
+          z-index: 2200;
+          position: fixed;
+          inset: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          /* Prevent scroll bleed, always overlay above everything */
+          pointer-events: all;
+          background: none;
         }
         .sq-modal-backdrop {
-          position:fixed;
-          inset:0;
+          position: fixed;
+          inset: 0;
           background: rgba(25,25,40,.31);
-          backdrop-filter: blur(3px);
-          z-index:2199;
+          backdrop-filter: blur(3.5px);
+          z-index: 2199;
         }
-        @keyframes modalIn { from{ opacity: 0; transform: scale(0.95) translate(-50%,-48%);} to{ opacity: 1; transform: scale(1) translate(-50%,-50%);} }
-        @keyframes modalOut { from{ opacity: 1; transform: scale(1) translate(-50%,-50%);} to{ opacity: 0; transform: scale(0.98) translate(-50%,-48%);} }
+        .sq-modal-content {
+          box-sizing: border-box;
+          width: 100%;
+          max-width: 384px;
+          border-radius: 17px;
+          min-width: 0;
+          margin: 0;
+        }
+        @media (max-width: 520px) {
+          .sq-modal-content {
+            padding: 1.35rem 0.55rem 1.2rem 0.55rem !important;
+            max-width: 99vw;
+            min-width: 0;
+          }
+        }
+        @media (max-width: 340px) {
+          .sq-modal-content {
+            padding: 1rem 2vw 1.04rem 2vw !important;
+          }
+        }
+        @keyframes modalIn {
+          from{ opacity: 0; transform: scale(0.95) translate(-50%,-48%);}
+          to{ opacity: 1; transform: scale(1) translate(-50%,-50%);}
+        }
+        @keyframes modalOut {
+          from{ opacity: 1; transform: scale(1) translate(-50%,-50%);}
+          to{ opacity: 0; transform: scale(0.98) translate(-50%,-48%);}
+        }
         .sq-modal-in { animation: modalIn 0.21s both;}
         .sq-modal-out { animation: modalOut 0.18s both;}
       `}</style>
