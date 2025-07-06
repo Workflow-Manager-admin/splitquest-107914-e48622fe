@@ -39,13 +39,12 @@ function exportToCsv(filename, rows, headers = null) {
 export default function GroupDashboard({ groupId, onBack }) {
   const {
     getGroupById,
-    getMembersForGroup,
     calculateNetBalances,
     addExpense,
     currentUserId,
   } = useGroups();
   const group = getGroupById(groupId);
-  const members = group ? getMembersForGroup(group) : [];
+  const members = group ? group.members : [];
 
   // Payment settlement log for this group (array of {from, to, amount, timestamp})
   // Persist per group, volatile only for demo purposes (refresh = gone)

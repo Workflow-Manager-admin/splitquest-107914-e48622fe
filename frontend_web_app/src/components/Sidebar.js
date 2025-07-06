@@ -18,21 +18,9 @@ export default function Sidebar() {
     {
       path: '/',
       exact: true,
-      icon: <FaHome size={21} />,
-      label: 'Dashboard',
-      tag: 'sq-tab-dashboard'
-    },
-    {
-      path: '/groups',
       icon: <FaUsers size={20} />,
       label: 'Groups',
       tag: 'sq-tab-groups'
-    },
-    {
-      path: '/expenses',
-      icon: <FaMoneyBillWave size={20} />,
-      label: 'Expenses',
-      tag: 'sq-tab-expenses'
     },
     {
       path: '/achievements',

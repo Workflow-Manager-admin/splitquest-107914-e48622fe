@@ -11,8 +11,7 @@ import React, { useMemo } from "react";
  */
 // PUBLIC_INTERFACE
 export default function GroupLeaderboard({ group, members, balances }) {
-  // Auto-calculate stats for leaderboard and assign fun badges/titles.
-  // All logic is mocked/derived from local expenses data.
+  // All logic is mocked/derived from local expenses data, but uses provided group.members.
 
   const leaderboard = useMemo(() => {
     if (!group || !group.expenses || !members.length) return [];
@@ -24,12 +23,11 @@ export default function GroupLeaderboard({ group, members, balances }) {
         name: m.name,
         totalPaid: 0,
         netOwed: 0,
-        owesTo: 0, // sum owed to others
-        getsFrom: 0, // sum gets from others
+        owesTo: 0,
+        getsFrom: 0,
         latestExpense: null,
       };
     });
-    // Go through all expenses
     group.expenses.forEach(e => {
       if (userStats[e.payer]) {
         userStats[e.payer].totalPaid += e.amount;
@@ -41,7 +39,6 @@ export default function GroupLeaderboard({ group, members, balances }) {
       }
       const share = e.amount / e.splitWith.length;
       e.splitWith.forEach(mid => {
-        // For total owed, treat the payer as not owing to themselves
         if (mid !== e.payer) {
           userStats[mid].netOwed += share;
         }
@@ -55,10 +52,6 @@ export default function GroupLeaderboard({ group, members, balances }) {
       userStats[uid].owesTo = (bal.owes || []).reduce((sum, o) => sum + o.amount, 0);
       userStats[uid].getsFrom = (bal.gets || []).reduce((sum, o) => sum + o.amount, 0);
     });
-    // Assign awards (rankings):
-    // 1. Big Spender: highest totalPaid
-    // 2. Budget Boss: highest balance (most net positive)
-    // 3. Always Owes: most owesTo
     const sortedByPaid = Object.values(userStats).slice().sort((a, b) => b.totalPaid - a.totalPaid);
     const sortedByBalance = Object.values(userStats).slice().sort((a, b) => (b.balance||0) - (a.balance||0));
     const sortedByOwes = Object.values(userStats).slice().sort((a, b) => b.owesTo - a.owesTo);
@@ -66,17 +59,14 @@ export default function GroupLeaderboard({ group, members, balances }) {
     if (sortedByPaid[0]) sortedByPaid[0].award = { emoji: "🤑", title: "Big Spender" };
     if (sortedByBalance[0]) sortedByBalance[0].award = { emoji: "🏆", title: "Budget Boss" };
     if (sortedByOwes[0]) sortedByOwes[0].award = { emoji: "🐢", title: "Always Owes" };
-    // If awards overlap, prefer 'Big Spender', then 'Budget Boss', then 'Always Owes'
-    // Remove duplicate awards
     const awardAssigned = {};
     Object.values(userStats).forEach(us => {
       if (us.award) {
-        if (awardAssigned[us.award.title]) us.award = null; // already awarded, skip (won't happen for >1 user)
+        if (awardAssigned[us.award.title]) us.award = null;
         else awardAssigned[us.award.title] = us.id;
       }
     });
 
-    // Default fallback if group is new
     if (group.expenses.length === 0) {
       return members.map(m => ({
         ...userStats[m.id],
@@ -84,7 +74,6 @@ export default function GroupLeaderboard({ group, members, balances }) {
       }));
     }
 
-    // Format for UI
     return Object.values(userStats).map(us => ({
       ...us,
       badge: us.award?.emoji,

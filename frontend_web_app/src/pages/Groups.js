@@ -6,14 +6,15 @@ import GroupDashboard from "./GroupDashboard";
 export default function Groups() {
   /**
    * Group management: list groups, create/new group, see per-group dashboard.
+   * Now: user must enter group name and add people (name, optional phone number) on creation.
    */
 
   const {
     groups,
     addGroup,
     getMembersForGroup,
-    getAllUsers,
-    currentUserId,
+    // getAllUsers, // not needed for creation, each group can have arbitrary members
+    // currentUserId, // not needed to check in form now
   } = useGroups();
 
   const [showCreate, setShowCreate] = useState(false);
@@ -43,17 +44,14 @@ export default function Groups() {
         </button>
         {showCreate && (
           <CreateGroupForm
-            allUsers={getAllUsers()}
             addGroup={addGroup}
             onDone={() => setShowCreate(false)}
-            currentUserId={currentUserId}
           />
         )}
         <div style={{ marginTop: "1.2rem" }}>
           <GroupList
             groups={groups}
             onSelect={setSelectedGroup}
-            getMembersForGroup={getMembersForGroup}
           />
         </div>
       </div>
@@ -63,8 +61,9 @@ export default function Groups() {
 
 /**
  * Lists user groups with name, size, and selects group for dashboard.
+ * Dynamically renders newest persisted member names for each group.
  */
-function GroupList({ groups, onSelect, getMembersForGroup }) {
+function GroupList({ groups, onSelect }) {
   if (!groups.length)
     return <div>No groups yet. Create your first group above!</div>;
   return (
@@ -89,7 +88,7 @@ function GroupList({ groups, onSelect, getMembersForGroup }) {
           <div>
             <strong>{g.name}</strong>
             <div style={{ fontSize: "0.96rem", color: "#888" }}>
-              {getMembersForGroup(g).map((m) => m.name).join(", ")}
+              {g.members.map((m) => m.name).join(", ")}
             </div>
           </div>
           <span style={{ fontSize: "1.8rem" }}>▶️</span>
@@ -100,30 +99,44 @@ function GroupList({ groups, onSelect, getMembersForGroup }) {
 }
 
 /**
- * Creation form for a group, with user multi-select.
+ * Creation form for a group, asks user for group name and a list of people (name/number).
+ * Allows adding/removing members dynamically.
  */
-function CreateGroupForm({ allUsers, addGroup, onDone, currentUserId }) {
+function CreateGroupForm({ addGroup, onDone }) {
   const [groupName, setGroupName] = useState("");
-  const [memberIds, setMemberIds] = useState([currentUserId]);
+  // Each member: { name: '', number: '' }
+  const [members, setMembers] = useState([
+    { name: "", number: "" },
+    { name: "", number: "" }
+  ]);
   const [error, setError] = useState("");
 
-  function toggleMember(id) {
-    setMemberIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((uid) => uid !== id)
-        : [...prev, id]
+  function handleMemberChange(idx, field, value) {
+    setMembers((prev) =>
+      prev.map((m, i) => (i === idx ? { ...m, [field]: value } : m))
     );
   }
-
+  function handleAddMember() {
+    setMembers((prev) => [...prev, { name: "", number: "" }]);
+  }
+  function handleRemoveMember(idx) {
+    setMembers((prev) => prev.filter((_, i) => i !== idx));
+  }
   function handleSubmit(e) {
     e.preventDefault();
-    if (!groupName.trim() || memberIds.length < 2) {
-      setError("Enter group name and choose at least two members.");
+    const validMembers = members
+      .map((m) => ({ ...m, name: m.name.trim() }))
+      .filter((m) => m.name.length > 0);
+    if (!groupName.trim() || validMembers.length < 2) {
+      setError("Enter a group name and at least two member names.");
       return;
     }
-    addGroup(groupName.trim(), memberIds);
+    addGroup(groupName.trim(), validMembers);
     setGroupName("");
-    setMemberIds([currentUserId]);
+    setMembers([
+      { name: "", number: "" },
+      { name: "", number: "" }
+    ]);
     setError("");
     if (onDone) onDone();
   }
@@ -149,16 +162,43 @@ function CreateGroupForm({ allUsers, addGroup, onDone, currentUserId }) {
       </div>
       <div style={{ marginBottom: 8 }}>
         <b>Members:</b>
-        {allUsers.map((u) => (
-          <label key={u.id} style={{ marginLeft: 10 }}>
-            <input
-              type="checkbox"
-              checked={memberIds.includes(u.id)}
-              onChange={() => toggleMember(u.id)}
-            />{" "}
-            {u.name}
-          </label>
-        ))}
+        <div>
+          {members.map((m, idx) => (
+            <div key={idx} style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
+              <input
+                style={{ marginRight: 6, width: 160 }}
+                placeholder="Name"
+                required
+                value={m.name}
+                onChange={e => handleMemberChange(idx, "name", e.target.value)}
+              />
+              <input
+                style={{ marginRight: 6, width: 120 }}
+                placeholder="Phone (optional)"
+                value={m.number}
+                onChange={e => handleMemberChange(idx, "number", e.target.value)}
+                type="tel"
+                inputMode="tel"
+                pattern="[0-9+ ()-]*"
+              />
+              <button
+                type="button"
+                className="theme-toggle"
+                style={{ fontSize: 14, padding: "5px 13px", background: "#FF5959", marginLeft: 2 }}
+                aria-label="Remove"
+                disabled={members.length <= 2}
+                onClick={() => handleRemoveMember(idx)}
+                tabIndex={0}
+              >-</button>
+            </div>
+          ))}
+          <button
+            type="button"
+            className="theme-toggle"
+            onClick={handleAddMember}
+            style={{marginTop: 3,background:"#4F8A8B",fontSize:14}}
+          >+ Add Member</button>
+        </div>
       </div>
       {error && (
         <div style={{ color: "#FF5959", marginBottom: 6 }}>{error}</div>

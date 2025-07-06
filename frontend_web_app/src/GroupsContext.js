@@ -8,7 +8,7 @@ const GroupsContext = createContext();
  * {userId: {name, netOwes: [{to: userId, amount: number}]}}
  * using a simple "settle-up" netting algorithm.
  * @param {object[]} expenses - List of expenses in the group.
- * @param {object[]} members  - Member data: {id, name}
+ * @param {object[]} members  - Member data: {id, name, number?}
  * @returns {object} Map of memberId -> { name, balance, owes: [ {...} ] }
  */
 function calculateNetBalances(expenses, members) {
@@ -57,14 +57,12 @@ function calculateNetBalances(expenses, members) {
       to: creditor.id,
       amount: Math.round(debt * 100) / 100
     });
-    debtor.net += debt; // this will get closer to 0
+    debtor.net += debt;
     creditor.net -= debt;
     if (Math.abs(debtor.net) < 0.009) d++;
     if (creditor.net < 0.009) c++;
   }
 
-  // For easier UI rendering, provide per member summary:
-  // { [memberId]: { name, owes: [{ to, amount }], gets: [{ from, amount }] } }
   const res = {};
   members.forEach(m => {
     res[m.id] = { name: m.name, owes: [], gets: [] };
@@ -74,7 +72,6 @@ function calculateNetBalances(expenses, members) {
     res[tr.to].gets.push({ from: tr.from, amount: tr.amount });
   });
 
-  // Add per-member balance for easy display (who is net-positive/negative)
   Object.keys(res).forEach(mid => {
     res[mid].balance = net[mid].net;
   });
@@ -86,52 +83,28 @@ function calculateNetBalances(expenses, members) {
  */
 // PUBLIC_INTERFACE
 export function GroupsProvider({ children }) {
-  // Mock, static friend/member data (simulate users)
-  const MOCK_USERS = [
-    { id: "u1", name: "Alice" },
-    { id: "u2", name: "Bob" },
-    { id: "u3", name: "Charlie" },
-    { id: "u4", name: "Dana" }
-  ];
-  // Groups in { id, name, members: [userId], expenses: [{...}] }
-  const [groups, setGroups] = useState([
-    // Example default group (starter)
-    {
-      id: "g1",
-      name: "Trip to Goa",
-      members: ["u1", "u2", "u3"],
-      expenses: [
-        {
-          id: "e1",
-          title: "Hotel",
-          amount: 3000,
-          date: "2024-05-10",
-          payer: "u1",
-          splitWith: ["u1", "u2", "u3"]
-        },
-        {
-          id: "e2",
-          title: "Taxi",
-          amount: 900,
-          date: "2024-05-11",
-          payer: "u2",
-          splitWith: ["u1", "u2", "u3"]
-        }
-      ]
-    }
-  ]);
+  // Unique ID generator
+  const makeId = (prefix="u") =>
+    prefix + (Date.now() + Math.floor(Math.random() * 100000));
 
-  // Add a new group
+  // State: Groups in { id, name, members: [{id, name, number}], expenses: [{ ... }] }
+  const [groups, setGroups] = useState([]);
+
+  // Add a new group, members should be: [{name, number}]
   // PUBLIC_INTERFACE
   const addGroup = (name, members) => {
-    const id = "g" + (Date.now() + Math.floor(Math.random() * 100000));
-    setGroups(g => [
-      ...g,
-      { id, name, members, expenses: [] }
-    ]);
+    const groupId = makeId("g");
+    // Assign an id to each member (unless already present)
+    const membersWithIds = members.map(m =>
+      ({ ...m, id: m.id || makeId("u") })
+    );
+    setGroups(g =>
+      [...g, { id: groupId, name, members: membersWithIds, expenses: [] }]
+    );
   };
 
   // Add an expense to a specific group
+  // expects: expenseData = {title, amount, date, payer, splitWith} with payer/splitWith as member ids
   // PUBLIC_INTERFACE
   const addExpense = (groupId, expenseData) => {
     setGroups(oldGroups =>
@@ -143,7 +116,7 @@ export function GroupsProvider({ children }) {
             ...gr.expenses,
             {
               ...expenseData,
-              id: "e" + (Date.now() + Math.floor(Math.random() * 100000))
+              id: makeId("e")
             }
           ]
         };
@@ -156,10 +129,20 @@ export function GroupsProvider({ children }) {
   const getGroupById = groupId => groups.find(g => g.id === groupId);
 
   // PUBLIC_INTERFACE
-  const getMembersForGroup = group => (group ? group.members.map(uid => MOCK_USERS.find(u => u.id === uid)) : []);
+  const getMembersForGroup = group => (group ? group.members : []);
 
-  // PUBLIC_INTERFACE - returns list of all users (simulate current user as "u1")
-  const getAllUsers = () => MOCK_USERS;
+  // Current user is just placeholder
+  const currentUserId = "current-user-1";
+
+  // Get all users (flatten all group members, unique by id)
+  // PUBLIC_INTERFACE
+  const getAllUsers = () => {
+    const all = groups.flatMap(g => g.members);
+    // De-duplicate by id
+    const mapById = {};
+    all.forEach(u => { mapById[u.id] = u; });
+    return Object.values(mapById);
+  };
 
   return (
     <GroupsContext.Provider
@@ -171,8 +154,7 @@ export function GroupsProvider({ children }) {
         getMembersForGroup,
         getAllUsers,
         calculateNetBalances,
-        MOCK_USERS,
-        currentUserId: "u1"
+        currentUserId
       }}
     >
       {children}

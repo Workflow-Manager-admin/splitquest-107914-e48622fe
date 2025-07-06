@@ -7,9 +7,7 @@ import { GroupsProvider } from './GroupsContext';
 import './App.css';
 
 // Lazy load pages for better performance
-const Dashboard = React.lazy(() => import('./pages/Dashboard'));
 const Groups = React.lazy(() => import('./pages/Groups'));
-const Expenses = React.lazy(() => import('./pages/Expenses'));
 const Achievements = React.lazy(() => import('./pages/Achievements'));
 const Analytics = React.lazy(() => import('./pages/Analytics'));
 const Notifications = React.lazy(() => import('./pages/Notifications'));
@@ -35,9 +33,8 @@ function MainLayout() {
         </header>
         <React.Suspense fallback={<div style={{textAlign:"center", padding:"3rem"}}>Loading...</div>}>
           <Routes>
-            <Route path="/" element={<Dashboard />} />
+            <Route path="/" element={<Groups />} />
             <Route path="/groups/*" element={<Groups />} />
-            <Route path="/expenses" element={<Expenses />} />
             <Route path="/achievements" element={<Achievements />} />
             <Route path="/analytics" element={<Analytics />} />
             <Route path="/notifications" element={<Notifications />} />
