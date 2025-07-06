@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useContext } from "react";
 import { useGroups } from "../GroupsContext";
 import ReceiptScanner from "./ReceiptScanner";
 import GroupLeaderboard from "./GroupLeaderboard";
+import { useTheme } from "../theme";
 
 // Utility to format datetime strings
 function formatTimestamp(ts) {
@@ -147,6 +148,8 @@ export default function GroupDashboard({ groupId, onBack }) {
     });
   }
 
+  const { theme, toggleTheme } = useTheme();
+
   if (!group) return <div>Group not found.</div>;
 
   return (
@@ -157,8 +160,85 @@ export default function GroupDashboard({ groupId, onBack }) {
         padding: "2rem",
         margin: "2rem 0",
         boxShadow: "0 2px 14px #4f8a8b1a",
+        position: "relative",
+        minHeight: "88vh"
       }}
     >
+      {/* Top-right action container */}
+      <div
+        className="sq-action-buttons"
+        style={{
+          position: "absolute",
+          top: 16,
+          right: 16,
+          zIndex: 10,
+          display: "flex",
+          flexDirection: "row",
+          gap: "12px",
+          padding: 0,
+          background: "transparent",
+          alignItems: "center",
+        }}
+      >
+        {/* Export CSV button */}
+        <button
+          className="sq-dashboard-export-btn"
+          onClick={handleExportCsv}
+          title="Export group expense & payment history CSV"
+          style={{
+            fontWeight: 700,
+            borderRadius: 18,
+            padding: "11px 22px",
+            background: "linear-gradient(90deg, #2d7ef0 75%, #6ac7ff 130%)",
+            color: "#fff",
+            fontSize: "1.01rem",
+            border: "none",
+            outline: "none",
+            boxShadow: "0 3px 14px #458af760, 0 1.5px 6px #2d7ef022",
+            letterSpacing: "0.04em",
+            cursor: "pointer",
+            transition: "background 0.32s, box-shadow 0.18s, transform 0.11s",
+            minWidth: 105,
+            minHeight: 43,
+            margin: 0,
+          }}
+          onMouseOver={e =>
+            (e.currentTarget.style.filter = "brightness(1.06)")
+          }
+          onMouseOut={e =>
+            (e.currentTarget.style.filter = "")
+          }
+        >
+          Export CSV
+        </button>
+        {/* Dark mode toggle, slightly smaller, vertically centered */}
+        <button
+          className={`theme-toggle${theme === "dark" ? " theme-toggle--dark" : ""}`}
+          onClick={toggleTheme}
+          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+          style={{
+            fontSize: "0.97rem",
+            padding: "9px 17px",
+            background: theme === "dark"
+              ? "linear-gradient(90deg, #232943 80%, #264364 100%)"
+              : "linear-gradient(90deg, #4f8a8b 70%, #7fdfff 100%)",
+            color: "#fff",
+            fontWeight: 600,
+            borderRadius: 16,
+            margin: 0,
+            alignSelf: "center",
+            boxShadow: "0 3px 14px #4f8a8b29",
+            minWidth: 40,
+            minHeight: 36,
+          }}
+        >
+          {theme === "light" ? "🌙" : "☀️"}
+        </button>
+      </div>
+
+      {/* Responsive: add space for header so buttons don't occlude content */}
+      <div style={{ height: 58 }} />
+
       <button
         onClick={onBack}
         className="theme-toggle"
@@ -180,8 +260,16 @@ export default function GroupDashboard({ groupId, onBack }) {
 
       <GroupLeaderboard group={group} members={members} balances={balances} />
 
+      {/* The main group action buttons row - add expense/scan */}
       <div>
-        <div style={{ display: "flex", gap: "1rem", marginBottom: 20 }}>
+        <div
+          style={{
+            display: "flex",
+            gap: "1rem",
+            marginBottom: 20,
+            flexWrap: "wrap"
+          }}
+        >
           <button
             className="theme-toggle"
             onClick={() => {
@@ -202,14 +290,6 @@ export default function GroupDashboard({ groupId, onBack }) {
             title="Use OCR to scan a bill or receipt and auto-extract items"
           >
             + Scan Receipt
-          </button>
-          <button
-            className="theme-toggle"
-            style={{ marginBottom: 0, background: "#2d7ef0" }}
-            onClick={handleExportCsv}
-            title="Export group expense & payment history CSV"
-          >
-            Export CSV
           </button>
         </div>
         {showAddExpense && (
@@ -243,6 +323,28 @@ export default function GroupDashboard({ groupId, onBack }) {
       <div style={{marginTop:12, fontSize:"0.97em", color:"#aaa", textAlign:"right"}}>
         <span role="img" aria-label="info">ℹ️</span> Settlements are tracked locally in your browser only (for demo purposes).
       </div>
+      {/* Responsive styling for mobile */}
+      <style>{`
+        @media (max-width: 640px) {
+          .sq-action-buttons {
+            top: 8px !important;
+            right: 8px !important;
+            gap: 9px !important;
+          }
+          .sq-dashboard-export-btn {
+            padding: 8px 10px !important;
+            font-size: 0.98rem !important;
+            min-width: 77px !important;
+            min-height: 34px !important;
+          }
+        }
+        @media (max-width: 420px) {
+          .sq-action-buttons {
+            top: 2.5vw !important;
+            right: 2.5vw !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }

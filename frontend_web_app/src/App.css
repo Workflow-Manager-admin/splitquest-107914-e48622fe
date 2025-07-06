@@ -413,6 +413,60 @@
   margin-bottom: 7px;
   outline: none;
 }
+
+/* --- Dashboard Export CSV + Top-right UI Button Styling --- */
+.sq-dashboard-export-btn {
+  font-weight: 800;
+  border-radius: 18px;
+  background: linear-gradient(90deg, #2d7ef0 75%, #6ac7ff 130%);
+  color: #fff !important;
+  font-size: 1.04rem;
+  border: none;
+  outline: none;
+  box-shadow: 0 3px 14px #458af760, 0 1.5px 6px #2d7ef022;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  min-width: 105px;
+  min-height: 43px;
+  margin: 0;
+  padding: 11px 22px;
+  transition: background 0.32s, box-shadow 0.18s, transform 0.13s, filter 0.14s;
+}
+.sq-dashboard-export-btn:hover, .sq-dashboard-export-btn:focus {
+  background: linear-gradient(90deg,#2166d6 67%, #43e9f9 120%);
+  box-shadow: 0 8px 26px #458af780, 0 2.5px 9px #47c8fa20;
+  filter: brightness(1.1) saturate(1.05);
+  transform: scale(1.035);
+  opacity: 0.98;
+  outline: 2px solid var(--color-accent,#FF5959);
+}
+.sq-dashboard-export-btn:active {
+  background: #2d7ef0;
+  filter: brightness(0.97);
+  transform: scale(0.98);
+}
+
+/* Special alignment for dashboard actions on mobile */
+@media (max-width: 640px) {
+  .sq-action-buttons {
+    top: 8px !important;
+    right: 8px !important;
+    gap: 9px !important;
+  }
+  .sq-dashboard-export-btn {
+    padding: 8px 10px !important;
+    font-size: 0.98rem !important;
+    min-width: 77px !important;
+    min-height: 34px !important;
+  }
+}
+@media (max-width: 420px) {
+  .sq-action-buttons {
+    top: 2.5vw !important;
+    right: 2.5vw !important;
+  }
+}
+
 .theme-toggle:active, .btn:active, button:active {
   background: #346e8a;
   transform: scale(0.98);
