@@ -11,30 +11,7 @@ function formatTimestamp(ts) {
   return d.toLocaleString();
 }
 
-// Utility to export arbitrary data as CSV
-function exportToCsv(filename, rows, headers = null) {
-  const separator = ",";
-  let keys = headers ? Object.values(headers) : (rows[0] && Object.keys(rows[0])) || [];
-  let csv =
-    (headers ? Object.keys(headers) : keys)
-      .map((k) => `"${k.replace(/"/g, '""')}"`)
-      .join(separator) +
-    "\n";
-  csv += rows
-    .map((row) =>
-      (headers ? Object.values(headers) : keys.map((k) => row[k])).map((val = "") =>
-        `"${(val ?? "")
-          .toString()
-          .replace(/"/g, '""')}"`).join(separator)
-    )
-    .join("\n");
-  // Download
-  const blob = new window.Blob([csv], { type: "text/csv" });
-  const link = document.createElement("a");
-  link.href = window.URL.createObjectURL(blob);
-  link.download = filename;
-  link.click();
-}
+
 
 // PUBLIC_INTERFACE
 export default function GroupDashboard({ groupId, onBack }) {
@@ -108,46 +85,6 @@ export default function GroupDashboard({ groupId, onBack }) {
     ]);
   }
 
-  // For CSV export, collate all group expenses and settlements
-  function handleExportCsv() {
-    // First, collate expenses log
-    const expenseRows = (group.expenses || []).map((e) => ({
-      Type: "Expense",
-      Title: e.title,
-      Amount: e.amount,
-      Date: e.date,
-      Payer: members.find((m) => m.id === e.payer)?.name || e.payer,
-      "Split With": e.splitWith.map((id) => members.find((m) => m.id === id)?.name || id).join(", "),
-      "Participants": "",
-      "Direction": "",
-      "Timestamp": ""
-    }));
-    // Now, settlements
-    const settlementRows = (settlements || []).map((s) => ({
-      Type: "Settlement",
-      Title: "",
-      Amount: s.amount,
-      Date: "",
-      Payer: members.find((m) => m.id === s.from)?.name || s.from,
-      "Split With": "",
-      "Participants": (members.find((m) => m.id === s.from)?.name || s.from) + " -> " + (members.find((m) => m.id === s.to)?.name || s.to),
-      "Direction": "SettleUp",
-      "Timestamp": formatTimestamp(s.timestamp),
-    }));
-    const allRows = [...expenseRows, ...settlementRows];
-    exportToCsv((group.name.replace(/\s+/g, "_") || "group") + "_expense_log.csv", allRows, {
-      "Entry Type": "Type",
-      "Title": "Title",
-      "Amount (₹)": "Amount",
-      "Expense Date": "Date",
-      "Paid By": "Payer",
-      "Split With": "Split With",
-      "Settlement Participants": "Participants",
-      "Direction": "Direction",
-      "Timestamp": "Timestamp"
-    });
-  }
-
   const { theme, toggleTheme } = useTheme();
 
   if (!group) return <div>Group not found.</div>;
@@ -167,16 +104,7 @@ export default function GroupDashboard({ groupId, onBack }) {
       {/* Top-right action container */}
       <div className="sq-topbar-blur" style={{zIndex: 11}}>
         <div className="sq-action-buttons sq-topbar-actions" role="group" aria-label="Top right actions">
-          {/* Export CSV button */}
-          <button
-            className="sq-dashboard-export-btn sq-topbar-btn"
-            onClick={handleExportCsv}
-            title="Export group expense & payment history CSV"
-            tabIndex={0}
-          >
-            Export CSV
-          </button>
-          {/* Dark mode toggle, vertically centered and matching Export */}
+          {/* Only theme toggle remains here after CSV button removal */}
           <button
             className={`theme-toggle sq-topbar-btn${theme === "dark" ? " theme-toggle--dark" : ""}`}
             onClick={toggleTheme}
@@ -282,12 +210,6 @@ export default function GroupDashboard({ groupId, onBack }) {
             top: 8px !important;
             right: 8px !important;
             gap: 9px !important;
-          }
-          .sq-dashboard-export-btn {
-            padding: 8px 10px !important;
-            font-size: 0.98rem !important;
-            min-width: 77px !important;
-            min-height: 34px !important;
           }
         }
         @media (max-width: 420px) {
