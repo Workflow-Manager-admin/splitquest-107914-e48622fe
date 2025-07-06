@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, useTheme } from './theme';
 import Sidebar from './components/Sidebar';
+import { GroupsProvider } from './GroupsContext';
 import './App.css';
 
 // Lazy load pages for better performance
@@ -57,18 +58,20 @@ function App() {
    */
   return (
     <ThemeProvider>
-      <Router>
-        <Routes>
-          {/* Auth page as root route when not logged in */}
-          <Route path="/auth/*" element={
-            <React.Suspense fallback={<div>Loading...</div>}>
-              <Auth />
-            </React.Suspense>
-          }/>
-          {/* All other pages use main layout */}
-          <Route path="/*" element={<MainLayout />} />
-        </Routes>
-      </Router>
+      <GroupsProvider>
+        <Router>
+          <Routes>
+            {/* Auth page as root route when not logged in */}
+            <Route path="/auth/*" element={
+              <React.Suspense fallback={<div>Loading...</div>}>
+                <Auth />
+              </React.Suspense>
+            }/>
+            {/* All other pages use main layout */}
+            <Route path="/*" element={<MainLayout />} />
+          </Routes>
+        </Router>
+      </GroupsProvider>
     </ThemeProvider>
   );
 }
