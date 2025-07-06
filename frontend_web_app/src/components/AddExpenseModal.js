@@ -41,8 +41,10 @@ export default function AddExpenseModal({
   // Utility to get member object/name by id
   const getName = (id) => members.find((m) => m.id === id)?.name || id;
 
-  // Remove any legacy bottom drawer logic – force true center modal. 
-  // The root modal uses .sq-modal-outer to always center with backdrop.
+  // ---- Modern, fixed centering & overlay modal logic:
+  // .sq-modal-outer: fixed, inset 0, z-index very high, pointer-events all
+  // .sq-modal-backdrop: fixed, inset 0, background rgba(0,0,0,0.5), z-index one below modal
+  // .sq-modal-content: centered card, max-width responsive, touch safe, border-radius
 
   // Handle checkbox toggle for splitting
   function handleSplitMemberToggle(id) {
@@ -304,46 +306,70 @@ export default function AddExpenseModal({
         </div>
       </form>
       <style>{`
+        /* --- Modal & Overlay Styling for AddExpenseModal --- */
         .sq-modal-outer {
-          z-index: 2200;
+          z-index: 9999; /* higher than everything else */
           position: fixed;
           inset: 0;
+          pointer-events: all;
           display: flex;
           justify-content: center;
           align-items: center;
-          /* Prevent scroll bleed, always overlay above everything */
-          pointer-events: all;
-          background: none;
+          background: none !important;
         }
         .sq-modal-backdrop {
           position: fixed;
           inset: 0;
-          background: rgba(25,25,40,.31);
-          backdrop-filter: blur(3.5px);
-          z-index: 2199;
+          width: 100vw; height: 100vh;
+          background: rgba(0,0,0,0.5);
+          z-index: 9998;
+          pointer-events: all;
+          touch-action: none;
+          /* Optionally, subtle blur for more focus */
+          backdrop-filter: blur(2.5px);
+          transition: background 0.22s;
         }
         .sq-modal-content {
           box-sizing: border-box;
-          width: 100%;
-          max-width: 384px;
-          border-radius: 17px;
+          width: 95vw;
+          max-width: 380px;
           min-width: 0;
-          margin: 0;
+          margin: 0 auto;
+          border-radius: 18px;
+          padding: 2.1rem 1.6rem 1.6rem 1.6rem;
+          background: #fff;
+          z-index: 10000;
+          /* Box shadow matches playful card style, pops above overlay */
+          box-shadow:
+            0 4px 36px #FFD27046,
+            0 2px 7px #FFD2701b;
+          outline: none;
+          touch-action: manipulation;
+          /* Animate pop/fade */
+        }
+        @media (max-width: 900px) {
+          .sq-modal-content {
+            width: 99vw;
+            max-width: 97vw;
+            min-width: 0;
+            padding: 1.5rem 0.7rem 1.15rem 0.7rem;
+            border-radius: 14px;
+          }
         }
         @media (max-width: 520px) {
           .sq-modal-content {
-            padding: 1.35rem 0.55rem 1.2rem 0.55rem !important;
-            max-width: 99vw;
-            min-width: 0;
+            padding: 1.25rem 2vw 1.01rem 2vw !important;
+            border-radius: 12px;
           }
         }
-        @media (max-width: 340px) {
+        @media (max-width: 370px) {
           .sq-modal-content {
-            padding: 1rem 2vw 1.04rem 2vw !important;
+            padding: 0.95rem 1vw 0.8rem 1vw !important;
+            border-radius: 9px;
           }
         }
         @keyframes modalIn {
-          from{ opacity: 0; transform: scale(0.95) translate(-50%,-48%);}
+          from{ opacity: 0; transform: scale(0.97) translate(-50%,-46%);}
           to{ opacity: 1; transform: scale(1) translate(-50%,-50%);}
         }
         @keyframes modalOut {
