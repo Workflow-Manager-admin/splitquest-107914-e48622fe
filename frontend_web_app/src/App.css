@@ -96,6 +96,55 @@
   transform: translateY(-2px) scale(1.03);
 }
 
+/* Dashboard Summary Cards */
+.sq-dashboard-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.33rem;
+  margin-bottom: 18px;
+}
+.sq-dashboard-summary-card {
+  /* Inlined by component, keep selectors for focus/active/hover */
+  outline: none;
+  border: none;
+  box-shadow: var(--shadow), 0 3px 22px #1111;
+  margin: 0.23em 0.1em;
+  transition: 
+    box-shadow 0.22s cubic-bezier(.22,0,.08,1),
+    transform 0.2s cubic-bezier(.22,0,.08,1),
+    background 0.21s;
+  cursor: pointer;
+  will-change: transform, box-shadow;
+  /* Font family/style handled in component */
+}
+.sq-dashboard-summary-card:focus,
+.sq-dashboard-summary-card:focus-visible {
+  outline: 2px solid var(--color-accent, #FF5959);
+  z-index: 2;
+}
+.sq-dashboard-summary-card:hover {
+  box-shadow: 0 8px 36px #ff59594c, 0 3px 13px #11c44733;
+  transform: translateY(-1.5px) scale(1.037);
+  filter: brightness(1.025);
+}
+.sq-dashboard-summary-card:active {
+  transform: scale(0.988) translateY(1px);
+  background: #f6fafc !important;
+}
+@media (max-width: 768px) {
+  .sq-dashboard-summary-row {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .sq-dashboard-summary-card {
+    width: 99%;
+    min-width: 0;
+    min-height: 100px;
+    margin: 0 0 0.7rem 0;
+    box-sizing: border-box;
+  }
+}
+
 /* --- Floating Action Button (FAB) --- */
 .sq-fab {
   position: fixed;
