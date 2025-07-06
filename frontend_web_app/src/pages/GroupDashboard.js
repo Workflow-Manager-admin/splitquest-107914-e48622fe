@@ -1,6 +1,5 @@
 import React, { useMemo, useState, useContext } from "react";
 import { useGroups } from "../GroupsContext";
-import ReceiptScanner from "./ReceiptScanner";
 import GroupLeaderboard from "./GroupLeaderboard";
 import { useTheme } from "../theme";
 
@@ -32,7 +31,6 @@ export default function GroupDashboard({ groupId, onBack }) {
 
   // UI state
   const [showAddExpense, setShowAddExpense] = useState(false);
-  const [showReceiptScanner, setShowReceiptScanner] = useState(false);
 
   // For balances, compute showing after excluding settled amounts
   // Recompute on every group/settlement update
@@ -140,7 +138,7 @@ export default function GroupDashboard({ groupId, onBack }) {
 
       <GroupLeaderboard group={group} members={members} balances={balances} />
 
-      {/* The main group action buttons row - add expense/scan */}
+      {/* Group action buttons - only Add Expense */}
       <div>
         <div
           style={{
@@ -154,22 +152,10 @@ export default function GroupDashboard({ groupId, onBack }) {
             className="theme-toggle"
             onClick={() => {
               setShowAddExpense((v) => !v);
-              setShowReceiptScanner(false);
             }}
             style={{ marginBottom: 0 }}
           >
             {showAddExpense ? "Cancel" : "+ Add Expense"}
-          </button>
-          <button
-            className="theme-toggle"
-            style={{ marginBottom: 0, background: "#11c447" }}
-            onClick={() => {
-              setShowReceiptScanner(true);
-              setShowAddExpense(false);
-            }}
-            title="Use OCR to scan a bill or receipt and auto-extract items"
-          >
-            + Scan Receipt
           </button>
         </div>
         {showAddExpense && (
@@ -179,12 +165,6 @@ export default function GroupDashboard({ groupId, onBack }) {
             onAdd={addExpense}
             currentUserId={currentUserId}
             onDone={() => setShowAddExpense(false)}
-          />
-        )}
-        {showReceiptScanner && (
-          <ReceiptScanner
-            groupId={group.id}
-            onDone={() => setShowReceiptScanner(false)}
           />
         )}
       </div>
