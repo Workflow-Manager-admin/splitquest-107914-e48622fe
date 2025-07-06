@@ -26,7 +26,7 @@ function MainLayout() {
       <div className="sq-main-content">
         <header className="App-header sq-header-row">
           <button
-            className="theme-toggle"
+            className={`theme-toggle${theme === "dark" ? " theme-toggle--dark" : ""}`}
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
           >
