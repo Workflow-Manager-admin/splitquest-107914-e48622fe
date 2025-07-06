@@ -29,9 +29,6 @@ export default function GroupDashboard({ groupId, onBack }) {
     group && group.settlements ? group.settlements : []
   );
 
-  // UI state
-  const [showAddExpense, setShowAddExpense] = useState(false);
-
   // For balances, compute showing after excluding settled amounts
   // Recompute on every group/settlement update
   const balances = useMemo(() => {
@@ -138,36 +135,6 @@ export default function GroupDashboard({ groupId, onBack }) {
 
       <GroupLeaderboard group={group} members={members} balances={balances} />
 
-      {/* Group action buttons - only Add Expense */}
-      <div>
-        <div
-          style={{
-            display: "flex",
-            gap: "1rem",
-            marginBottom: 20,
-            flexWrap: "wrap"
-          }}
-        >
-          <button
-            className="theme-toggle"
-            onClick={() => {
-              setShowAddExpense((v) => !v);
-            }}
-            style={{ marginBottom: 0 }}
-          >
-            {showAddExpense ? "Cancel" : "+ Add Expense"}
-          </button>
-        </div>
-        {showAddExpense && (
-          <AddExpenseForm
-            group={group}
-            members={members}
-            onAdd={addExpense}
-            currentUserId={currentUserId}
-            onDone={() => setShowAddExpense(false)}
-          />
-        )}
-      </div>
       <h3 style={{ marginTop: "2rem" }}>Expenses</h3>
       <ExpenseList expenses={group.expenses} members={members} />
       <h3 style={{ marginTop: "2rem" }}>Balances</h3>
@@ -203,118 +170,7 @@ export default function GroupDashboard({ groupId, onBack }) {
   );
 }
 
-/**
- * Expense entry form, fields: title, amount, date, payer, splitWith.
- */
-function AddExpenseForm({
-  group,
-  members,
-  onAdd,
-  currentUserId,
-  onDone,
-}) {
-  const [title, setTitle] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState("");
-  const [payer, setPayer] = useState(currentUserId);
-  const [splitWith, setSplitWith] = useState(members.map((m) => m.id));
-  const [error, setError] = useState("");
 
-  function toggleSplitWith(id) {
-    setSplitWith((prev) =>
-      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
-    );
-  }
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (
-      !title.trim() ||
-      !amount ||
-      isNaN(parseFloat(amount)) ||
-      splitWith.length === 0
-    ) {
-      setError("Please enter all required fields.");
-      return;
-    }
-    onAdd(group.id, {
-      title: title.trim(),
-      amount: parseFloat(amount),
-      date: date || new Date().toISOString().slice(0, 10),
-      payer,
-      splitWith,
-    });
-    setTitle("");
-    setAmount("");
-    setDate("");
-    setPayer(currentUserId);
-    setSplitWith(members.map((m) => m.id));
-    setError("");
-    if (onDone) onDone();
-  }
-  return (
-    <form
-      onSubmit={handleSubmit}
-      style={{
-        background: "#f8f9fa",
-        padding: "1rem",
-        borderRadius: 12,
-        marginBottom: 18,
-      }}
-    >
-      <div>
-        <input
-          required
-          style={{ marginBottom: 8, width: 180 }}
-          placeholder="Expense Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
-        <input
-          required
-          type="number"
-          step="0.01"
-          style={{ marginBottom: 8, width: 100 }}
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-        />
-        <input
-          type="date"
-          style={{ marginBottom: 8 }}
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
-      </div>
-      <div style={{ marginBottom: 8 }}>
-        <b>Payer:</b>{" "}
-        <select value={payer} onChange={(e) => setPayer(e.target.value)}>
-          {members.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.name}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div style={{ marginBottom: 8 }}>
-        <b>Split with:</b>
-        {members.map((m) => (
-          <label key={m.id} style={{ marginLeft: 8 }}>
-            <input
-              type="checkbox"
-              checked={splitWith.includes(m.id)}
-              onChange={() => toggleSplitWith(m.id)}
-            />{" "}
-            {m.name}
-          </label>
-        ))}
-      </div>
-      {error && <div style={{ color: "#FF5959" }}>{error}</div>}
-      <button className="theme-toggle" type="submit" style={{ marginTop: 6 }}>
-        Add Expense
-      </button>
-    </form>
-  );
-}
 
 /**
  * Expense history list with details.
