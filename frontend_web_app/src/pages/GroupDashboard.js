@@ -27,12 +27,59 @@ export default function GroupDashboard({ groupId, onBack }) {
   // State: show add-expense modal
   const [showAddExpense, setShowAddExpense] = useState(false);
 
-  // Handler for adding an expense via modal
+  // Show split summary with owed values after form submit, before adding to expenses
+  const [pendingExpense, setPendingExpense] = useState(null);
+  const [pendingCalculation, setPendingCalculation] = useState(null);
+
+  // Handler for adding an expense via modal (now shows owed split summary before confirming)
+  // expense: {title, amount, payer, date, splitWith, annotator}
   function handleAddExpense(expense) {
-    // expense: {title, amount, payer, date, splitWith, annotator}
-    // We ignore annotator for backend but could log it
-    addExpense(groupId, expense);
-    setShowAddExpense(false);
+    const { amount, splitWith } = expense;
+    // Calculate equal split for each selected member
+    const splitNum = Number(amount);
+    const validSplit =
+      splitNum > 0 && Array.isArray(splitWith) && splitWith.length > 0 && !isNaN(splitNum);
+    if (!validSplit) {
+      // fallback, should not occur via modal UI
+      addExpense(groupId, expense);
+      setShowAddExpense(false);
+      return;
+    }
+    // Build per-person split summary
+    const perPerson = Math.round((splitNum / splitWith.length) * 100) / 100;
+    // Compose owed details array
+    const owedDetails = splitWith.map((id) => {
+      const m = members.find((mm) => mm.id === id);
+      return {
+        id,
+        name: m ? m.name : id,
+        owed: perPerson,
+        isPayer: id === expense.payer
+      };
+    });
+    setPendingCalculation({
+      ...expense,
+      owedDetails,
+      perPerson
+    });
+    setPendingExpense(expense);
+    setShowAddExpense(false); // Hide modal, show confirmation/split below
+  }
+
+  // Handler for confirming split and adding expense
+  function handleConfirmAddExpense() {
+    if (pendingExpense) {
+      addExpense(groupId, pendingExpense);
+    }
+    setPendingCalculation(null);
+    setPendingExpense(null);
+  }
+
+  // Handler to go back and edit expense again
+  function handleCancelExpenseSummary() {
+    setPendingExpense(null);
+    setPendingCalculation(null);
+    setShowAddExpense(true);
   }
 
   // Payment settlement log for this group (array of {from, to, amount, timestamp})
@@ -154,7 +201,11 @@ export default function GroupDashboard({ groupId, onBack }) {
       <FAB
         icon={<FaPlus />}
         label="Add Expense"
-        onClick={() => setShowAddExpense(true)}
+        onClick={() => {
+          setShowAddExpense(true);
+          setPendingExpense(null);
+          setPendingCalculation(null);
+        }}
         style={{
           position: "fixed",
           bottom: "2.1rem",
@@ -172,6 +223,16 @@ export default function GroupDashboard({ groupId, onBack }) {
         onClose={() => setShowAddExpense(false)}
         onSubmit={handleAddExpense}
       />
+
+      {/* Show per-person split summary (confirmation dialog) after form submit, before adding */}
+      {pendingCalculation && (
+        <PerPersonOwedSummary
+          expense={pendingCalculation}
+          members={members}
+          onConfirm={handleConfirmAddExpense}
+          onCancel={handleCancelExpenseSummary}
+        />
+      )}
 
       <h3 style={{ marginTop: "2rem" }}>Balances</h3>
       <BalancesView
@@ -206,6 +267,123 @@ export default function GroupDashboard({ groupId, onBack }) {
           }
         }
       `}</style>
+    </div>
+  );
+}
+
+/**
+ * Per-person owed summary confirmation UI: after form submit, before final add.
+ * Shows a summary of the calculated splits and lets user confirm adding the expense.
+ */
+function PerPersonOwedSummary({ expense, members, onConfirm, onCancel }) {
+  const { title, amount, payer, date, splitWith, owedDetails, perPerson } = expense;
+  // Get member name
+  const getName = (id) => members.find((m) => m.id === id)?.name || id;
+  return (
+    <div
+      className="sq-form-card"
+      style={{
+        position: "fixed",
+        top: "50%",
+        left: "50%",
+        width: 380,
+        maxWidth: "97vw",
+        transform: "translate(-50%,-50%)",
+        zIndex: 2300,
+        background: "#fff",
+        borderRadius: 17,
+        padding: "2.1rem 1.7rem 1.7rem 1.7rem",
+        boxShadow: "0 4px 38px #FFD27069, 0 2px 9px #FFD2702b",
+        display: "flex",
+        flexDirection: "column",
+        gap: "1.05rem",
+        alignItems: "center",
+        animation: "modalIn 0.16s linear both",
+      }}
+      tabIndex={-1}
+    >
+      <h3 style={{
+        color: "var(--color-accent, #FF5959)",
+        fontWeight: 900,
+        fontSize: "1.4rem",
+        marginBottom: 6
+      }}>
+        Confirm Split <span role="img" aria-label="summary">🧾</span>
+      </h3>
+      <div style={{
+        width: "100%",
+        fontWeight: 500,
+        color: "#4F8A8B",
+        background: "#f5fdff",
+        padding: "8px 14px",
+        borderRadius: 8,
+        marginBottom: 7,
+      }}>
+        <b>{title}</b> &mdash; <span style={{color:"#FF5959"}}>₹{amount}</span> <br />
+        Paid by: <span style={{color:"#19b859"}}>{getName(payer)}</span>{" "}|{" "}
+        Split between <b>{splitWith.length}</b> member{splitWith.length > 1 ? "s" : ""} <br />
+        Date: {date}
+      </div>
+      <div style={{
+        width: "100%",
+        marginBottom: 6,
+        borderRadius: 7,
+        background: "#f8f0fa",
+        fontSize: "1.01em",
+        padding: "10px 10px 7px 10px"
+      }}>
+        <b>Each member owes:</b>
+        <ul style={{
+          listStyle: "none",
+          padding: 0,
+          margin: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 7,
+          marginTop: 6,
+        }}>
+          {owedDetails.map((o) => (
+            <li key={o.id} style={{ color: o.isPayer ? "#19b859" : "#333", fontWeight: o.isPayer ? 700 : 600 }}>
+              {o.isPayer
+                ? <>🟢 {o.name} (payer): <span style={{color:"#19b859"}}>gets reimbursed</span></>
+                : <>{o.name} pays <span style={{fontWeight:700}}>₹{o.owed}</span></>
+              }
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div style={{
+        display: "flex",
+        flexDirection: "row",
+        gap: 16,
+        marginTop: 9,
+        alignItems: "center",
+        width: "100%",
+        justifyContent: "flex-end"
+      }}>
+        <button
+          className="theme-toggle"
+          style={{
+            background: "var(--color-primary,#4F8A8B)",
+            color: "#fff",
+            minWidth: 90,
+          }}
+          onClick={onCancel}
+        >
+          Edit
+        </button>
+        <button
+          className="theme-toggle"
+          style={{
+            background: "var(--color-accent,#FF5959)",
+            color: "#fff",
+            minWidth: 130,
+          }}
+          onClick={onConfirm}
+        >
+          Confirm & Add
+        </button>
+      </div>
     </div>
   );
 }
