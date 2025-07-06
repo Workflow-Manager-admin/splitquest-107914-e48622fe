@@ -104,29 +104,41 @@ function GroupList({ groups, onSelect }) {
  */
 function CreateGroupForm({ addGroup, onDone }) {
   const [groupName, setGroupName] = useState("");
-  // Each member: { name: '', number: '' }
+  // Number of members input
+  const [numMembers, setNumMembers] = useState(2);
+  // Each member: { name: '', number: '' } - initially two, but now controlled by numMembers
   const [members, setMembers] = useState([
     { name: "", number: "" },
     { name: "", number: "" }
   ]);
   const [error, setError] = useState("");
 
+  // Adjust the members input array as numMembers changes
+  React.useEffect(() => {
+    if (numMembers > members.length) {
+      setMembers((prev) => [
+        ...prev,
+        ...Array(numMembers - prev.length).fill().map(() => ({ name: "", number: "" }))
+      ]);
+    } else if (numMembers < members.length) {
+      setMembers((prev) => prev.slice(0, numMembers));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numMembers]);
+
   function handleMemberChange(idx, field, value) {
     setMembers((prev) =>
       prev.map((m, i) => (i === idx ? { ...m, [field]: value } : m))
     );
   }
-  function handleAddMember() {
-    setMembers((prev) => [...prev, { name: "", number: "" }]);
-  }
-  function handleRemoveMember(idx) {
-    setMembers((prev) => prev.filter((_, i) => i !== idx));
-  }
+  // No explicit add/removal buttons; controlled via numMembers
   function handleSubmit(e) {
     e.preventDefault();
     const validMembers = members
-      .map((m) => ({ ...m, name: m.name.trim() }))
+      .slice(0, numMembers)
+      .map((m) => ({ ...m, name: (m.name ?? "").trim() }))
       .filter((m) => m.name.length > 0);
+    // Minimum 2 members is a sensible restriction for a group
     if (!groupName.trim() || validMembers.length < 2) {
       setError("Enter a group name and at least two member names.");
       return;
@@ -137,6 +149,7 @@ function CreateGroupForm({ addGroup, onDone }) {
       { name: "", number: "" },
       { name: "", number: "" }
     ]);
+    setNumMembers(2);
     setError("");
     if (onDone) onDone();
   }
@@ -160,44 +173,52 @@ function CreateGroupForm({ addGroup, onDone }) {
           style={{ marginRight: 10, width: 200 }}
         />
       </div>
+      <div style={{ marginBottom: 10 }}>
+        <label>
+          <b>Number of Members:</b>
+          <input
+            type="number"
+            min={2}
+            step={1}
+            value={numMembers}
+            onChange={e => {
+              let val = Number(e.target.value);
+              if (isNaN(val) || val < 2) val = 2;
+              if (val > 20) val = 20; // Arbitrary max for sanity
+              setNumMembers(val);
+            }}
+            style={{ marginLeft: 10, width: 60 }}
+            required
+          />
+        </label>
+        <span style={{ color: "#999", marginLeft: 8, fontSize: "0.98em" }}>(min 2)</span>
+      </div>
       <div style={{ marginBottom: 8 }}>
         <b>Members:</b>
         <div>
-          {members.map((m, idx) => (
+          {Array.from({ length: numMembers }).map((_, idx) => (
             <div key={idx} style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
               <input
                 style={{ marginRight: 6, width: 160 }}
                 placeholder="Name"
                 required
-                value={m.name}
+                value={members[idx]?.name || ""}
                 onChange={e => handleMemberChange(idx, "name", e.target.value)}
+                data-testid={`member-name-input-${idx}`}
               />
               <input
                 style={{ marginRight: 6, width: 120 }}
                 placeholder="Phone (optional)"
-                value={m.number}
+                value={members[idx]?.number || ""}
                 onChange={e => handleMemberChange(idx, "number", e.target.value)}
                 type="tel"
                 inputMode="tel"
                 pattern="[0-9+ ()-]*"
+                data-testid={`member-number-input-${idx}`}
               />
-              <button
-                type="button"
-                className="theme-toggle"
-                style={{ fontSize: 14, padding: "5px 13px", background: "#FF5959", marginLeft: 2 }}
-                aria-label="Remove"
-                disabled={members.length <= 2}
-                onClick={() => handleRemoveMember(idx)}
-                tabIndex={0}
-              >-</button>
             </div>
           ))}
-          <button
-            type="button"
-            className="theme-toggle"
-            onClick={handleAddMember}
-            style={{marginTop: 3,background:"#4F8A8B",fontSize:14}}
-          >+ Add Member</button>
+          {/* Add/Remove buttons are not needed; number controlled above */}
         </div>
       </div>
       {error && (
