@@ -65,7 +65,7 @@
   align-items: center;
   gap: 1.23em;   /* icon-text spacing */
   padding: 0.98rem 2rem 0.98rem 2.3rem;
-  color: var(--color-primary, #4F8A8B);
+  color: #000 !important; /* Default sidebar text is black */
   text-decoration: none;
   border-left: 3.5px solid transparent;
   font-weight: 500;
@@ -149,7 +149,12 @@
   letter-spacing: 0.04em;
   z-index: 2;
   opacity: 0.98;
+  color: #000 !important;
   transition: color .22s cubic-bezier(.44,1,.52,1);
+}
+
+.sq-header, h1, h2, h3, .sq-sidebar__brand, .sq-sidebar__title {
+  color: #000 !important;
 }
 
 /* Invite Friends gets louder accent color always */

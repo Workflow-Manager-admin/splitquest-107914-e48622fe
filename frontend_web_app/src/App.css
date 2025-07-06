@@ -3,18 +3,18 @@
   /* Light theme colors */
   --bg-primary: #fff;
   --bg-secondary: #f8f9fa;
-  --text-primary: #2A253A;
-  --text-secondary: #4F8A8B;
+  --text-primary: #000;   /* Set primary text color to black */
+  --text-secondary: #222; /* Set secondary text color to a darker shade */
   --border-color: #e9ecef;
   --button-bg: #4F8A8B;
-  --button-text: #fff;
+  --button-text: #000;    /* Use black for button text */
   --card-bg: #fff;
   --shadow: 0 3px 12px 0 #d1d0e71c;
   --card-radius: 19px;
   --header-font: 'Baloo 2', cursive, sans-serif;
   --body-font: 'Nunito', 'Segoe UI', 'Roboto', Arial, sans-serif;
   --fab-bg: #FF5959;
-  --fab-color: #fff;
+  --fab-color: #000;      /* Set FAB icon/text color to black */
   --fab-shadow: 0 4px 16px #ff595936;
 }
 
@@ -22,16 +22,16 @@
   /* Dark theme colors */
   --bg-primary: #191927;
   --bg-secondary: #222235;
-  --text-primary: #F4F2FD;
-  --text-secondary: #FBD46D;
+  --text-primary: #000;      /* Force black text in dark theme too */
+  --text-secondary: #222;
   --border-color: #28284a;
   --button-bg: #4F8A8B;
-  --button-text: #fff;
+  --button-text: #000;       /* Button text black in dark theme */
   --card-bg: #22223c;
   --shadow: 0 3px 13px 0 #2210334a;
   --card-radius: 19px;
   --fab-bg: #FF5959;
-  --fab-color: #fff;
+  --fab-color: #000;         /* Black for FAB in dark mode */
   --fab-shadow: 0 3px 16px #ff595945;
 }
 
@@ -63,6 +63,27 @@
     background 0.48s cubic-bezier(.23,1,.32,1),
     color 0.36s cubic-bezier(.23,1,.32,1);
 }
+
+/* Global text color + font overrides for universal black text */
+body,
+html,
+.App,
+#root,
+h1, h2, h3, h4, h5, h6,
+p, span, label,
+input, select, textarea,
+button, .btn, .theme-toggle
+{
+  color: #000 !important;
+  font-family: var(--body-font);
+  /* Fallback for legacy components */
+}
+
+/* Ensure placeholder is visible as black as well */
+input::placeholder, textarea::placeholder {
+  color: #222 !important;
+  opacity: 1 !important;
+}
 /* --- Playful Card and Layout Helpers --- */
 .sq-card,
 .sq-dashboard-card,
@@ -82,7 +103,7 @@
   justify-content: center;
   font-weight: 500;
   text-decoration: none;
-  color: var(--text-secondary);
+  color: #000 !important;  /* Always black for summary cards */
   gap: 0.45rem;
   margin-top: 1rem;
   font-size: 1.13rem;
@@ -500,7 +521,7 @@
   border: none;
   border-radius: 10px;
   background: var(--button-bg);
-  color: var(--button-text);
+  color: #000 !important; /* Always black text for buttons */
   font-weight: 600;
   font-size: 1rem;
   letter-spacing: 0.01em;

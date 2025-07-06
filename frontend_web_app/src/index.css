@@ -2,9 +2,13 @@
 @import url('https://fonts.googleapis.com/css?family=Baloo+2:700&display=swap');
 @import url('https://fonts.googleapis.com/css?family=Nunito:400,600&display=swap');
 
-body {
+body,
+html,
+#root {
   margin: 0;
   font-family: 'Nunito', 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  color: #000 !important;
+  background: #fff;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
