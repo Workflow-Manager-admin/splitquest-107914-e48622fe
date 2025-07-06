@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useGroups } from "../GroupsContext";
-import AddExpenseModal from "../components/AddExpenseModal";
+// import AddExpenseModal from "../components/AddExpenseModal";
 import { FAB } from "../components/FAB";
 import { FaPlus, FaTrash, FaEdit, FaMoneyBillWave, FaCalendarAlt, FaUser, FaUsers } from "react-icons/fa";
 
@@ -342,16 +342,7 @@ export default function Expenses() {
           />
 
           {/* Add/Edit Expense Modal */}
-          <AddExpenseModal
-            members={members}
-            currentUserId={currentUserId}
-            open={showModal}
-            onClose={() => {
-              setShowModal(false);
-              setEditExpenseId(null);
-            }}
-            onSubmit={handleAddExpense}
-          />
+          {/* AddExpenseModal removed */}
 
           {/* Breakdown Confirmation */}
           {pendingBreakdown && (

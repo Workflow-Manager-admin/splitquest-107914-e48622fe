@@ -1,10 +1,7 @@
-import React, { useMemo, useState, useContext } from "react";
+import React, { useMemo, useState } from "react";
 import { useGroups } from "../GroupsContext";
 import GroupLeaderboard from "./GroupLeaderboard";
 import { useTheme } from "../theme";
-import AddExpenseModal from "../components/AddExpenseModal";
-import { FAB } from "../components/FAB";
-import { FaPlus } from "react-icons/fa";
 
 // Utility to format datetime strings
 function formatTimestamp(ts) {
@@ -18,69 +15,10 @@ export default function GroupDashboard({ groupId, onBack }) {
   const {
     getGroupById,
     calculateNetBalances,
-    addExpense,
     currentUserId,
   } = useGroups();
   const group = getGroupById(groupId);
   const members = group ? group.members : [];
-
-  // State: show add-expense modal
-  const [showAddExpense, setShowAddExpense] = useState(false);
-
-  // Show split summary with owed values after form submit, before adding to expenses
-  const [pendingExpense, setPendingExpense] = useState(null);
-  const [pendingCalculation, setPendingCalculation] = useState(null);
-
-  // Handler for adding an expense via modal (now shows owed split summary before confirming)
-  // expense: {title, amount, payer, date, splitWith, annotator}
-  function handleAddExpense(expense) {
-    const { amount, splitWith } = expense;
-    // Calculate equal split for each selected member
-    const splitNum = Number(amount);
-    const validSplit =
-      splitNum > 0 && Array.isArray(splitWith) && splitWith.length > 0 && !isNaN(splitNum);
-    if (!validSplit) {
-      // fallback, should not occur via modal UI
-      addExpense(groupId, expense);
-      setShowAddExpense(false);
-      return;
-    }
-    // Build per-person split summary
-    const perPerson = Math.round((splitNum / splitWith.length) * 100) / 100;
-    // Compose owed details array
-    const owedDetails = splitWith.map((id) => {
-      const m = members.find((mm) => mm.id === id);
-      return {
-        id,
-        name: m ? m.name : id,
-        owed: perPerson,
-        isPayer: id === expense.payer
-      };
-    });
-    setPendingCalculation({
-      ...expense,
-      owedDetails,
-      perPerson
-    });
-    setPendingExpense(expense);
-    setShowAddExpense(false); // Hide modal, show confirmation/split below
-  }
-
-  // Handler for confirming split and adding expense
-  function handleConfirmAddExpense() {
-    if (pendingExpense) {
-      addExpense(groupId, pendingExpense);
-    }
-    setPendingCalculation(null);
-    setPendingExpense(null);
-  }
-
-  // Handler to go back and edit expense again
-  function handleCancelExpenseSummary() {
-    setPendingExpense(null);
-    setPendingCalculation(null);
-    setShowAddExpense(true);
-  }
 
   // Payment settlement log for this group (array of {from, to, amount, timestamp})
   // Persist per group, volatile only for demo purposes (refresh = gone)
@@ -158,7 +96,6 @@ export default function GroupDashboard({ groupId, onBack }) {
       {/* Top-right action container */}
       <div className="sq-topbar-blur" style={{zIndex: 11}}>
         <div className="sq-action-buttons sq-topbar-actions" role="group" aria-label="Top right actions">
-          {/* Only theme toggle remains here after CSV button removal */}
           <button
             className={`theme-toggle sq-topbar-btn${theme === "dark" ? " theme-toggle--dark" : ""}`}
             onClick={toggleTheme}
@@ -196,43 +133,6 @@ export default function GroupDashboard({ groupId, onBack }) {
 
       <h3 style={{ marginTop: "2rem" }}>Expenses</h3>
       <ExpenseList expenses={group.expenses} members={members} />
-
-      {/* Add FAB for "Add Expense" */}
-      <FAB
-        icon={<FaPlus />}
-        label="Add Expense"
-        onClick={() => {
-          setShowAddExpense(true);
-          setPendingExpense(null);
-          setPendingCalculation(null);
-        }}
-        style={{
-          position: "fixed",
-          bottom: "2.1rem",
-          right: "2.1rem",
-          zIndex: 2100,
-        }}
-        data-testid="add-expense-fab"
-      />
-
-      {/* Add Expense Modal */}
-      <AddExpenseModal
-        members={members}
-        currentUserId={currentUserId}
-        open={showAddExpense}
-        onClose={() => setShowAddExpense(false)}
-        onSubmit={handleAddExpense}
-      />
-
-      {/* Show per-person split summary (confirmation dialog) after form submit, before adding */}
-      {pendingCalculation && (
-        <PerPersonOwedSummary
-          expense={pendingCalculation}
-          members={members}
-          onConfirm={handleConfirmAddExpense}
-          onCancel={handleCancelExpenseSummary}
-        />
-      )}
 
       <h3 style={{ marginTop: "2rem" }}>Balances</h3>
       <BalancesView
