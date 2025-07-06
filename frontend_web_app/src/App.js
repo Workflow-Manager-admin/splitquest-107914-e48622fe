@@ -23,13 +23,19 @@ function MainLayout() {
       <Sidebar />
       <div className="sq-main-content">
         <header className="App-header sq-header-row">
-          <button
-            className={`theme-toggle${theme === "dark" ? " theme-toggle--dark" : ""}`}
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-          >
-            {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
-          </button>
+          <div className="sq-action-buttons" role="group" aria-label="Top right actions">
+            {/* Add future action buttons here, e.g. notifications/login/logout */}
+            <button
+              className={`theme-toggle${theme === "dark" ? " theme-toggle--dark" : ""}`}
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+            >
+              {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+            </button>
+            {/* Example placeholder for another action button:
+            <button className="action-btn" aria-label="Notifications"><FaBell /></button>
+            */}
+          </div>
         </header>
         <React.Suspense fallback={<div style={{textAlign:"center", padding:"3rem"}}>Loading...</div>}>
           <Routes>

@@ -184,6 +184,43 @@
 .sq-header-row, .App-header {
   font-family: var(--header-font);
 }
+
+/* --- Top-right action buttons container --- */
+.sq-action-buttons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-left: auto;
+  margin-right: 0;
+  min-height: 44px;
+}
+.sq-action-buttons > * {
+  margin: 0 !important;
+  /* Ensure consistent height/width for all action buttons */
+  min-width: 43px;
+  min-height: 43px;
+  font-size: 1rem;
+  line-height: 1.2;
+  border-radius: 11px;
+}
+
+@media (max-width: 768px) {
+  .sq-action-buttons {
+    gap: 0.32rem;
+    justify-content: flex-end;
+    min-height: 38px;
+    padding-right: 2px;
+  }
+  .sq-action-buttons > * {
+    min-width: 40px;
+    min-height: 36px;
+    font-size: 0.97rem;
+    padding: 6px 7px;
+  }
+}
+
 .sq-sidebar__brand { font-size: 2rem; letter-spacing: 2px; margin-bottom: 0.15em; }
 .sq-sidebar__title { font-size: 1.13rem !important; font-family: var(--header-font); }
 
