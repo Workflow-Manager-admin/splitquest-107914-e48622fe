@@ -165,75 +165,27 @@ export default function GroupDashboard({ groupId, onBack }) {
       }}
     >
       {/* Top-right action container */}
-      <div
-        className="sq-action-buttons"
-        style={{
-          position: "absolute",
-          top: 16,
-          right: 16,
-          zIndex: 10,
-          display: "flex",
-          flexDirection: "row",
-          gap: "12px",
-          padding: 0,
-          background: "transparent",
-          alignItems: "center",
-        }}
-      >
-        {/* Export CSV button */}
-        <button
-          className="sq-dashboard-export-btn"
-          onClick={handleExportCsv}
-          title="Export group expense & payment history CSV"
-          style={{
-            fontWeight: 700,
-            borderRadius: 18,
-            padding: "11px 22px",
-            background: "linear-gradient(90deg, #2d7ef0 75%, #6ac7ff 130%)",
-            color: "#fff",
-            fontSize: "1.01rem",
-            border: "none",
-            outline: "none",
-            boxShadow: "0 3px 14px #458af760, 0 1.5px 6px #2d7ef022",
-            letterSpacing: "0.04em",
-            cursor: "pointer",
-            transition: "background 0.32s, box-shadow 0.18s, transform 0.11s",
-            minWidth: 105,
-            minHeight: 43,
-            margin: 0,
-          }}
-          onMouseOver={e =>
-            (e.currentTarget.style.filter = "brightness(1.06)")
-          }
-          onMouseOut={e =>
-            (e.currentTarget.style.filter = "")
-          }
-        >
-          Export CSV
-        </button>
-        {/* Dark mode toggle, slightly smaller, vertically centered */}
-        <button
-          className={`theme-toggle${theme === "dark" ? " theme-toggle--dark" : ""}`}
-          onClick={toggleTheme}
-          aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          style={{
-            fontSize: "0.97rem",
-            padding: "9px 17px",
-            background: theme === "dark"
-              ? "linear-gradient(90deg, #232943 80%, #264364 100%)"
-              : "linear-gradient(90deg, #4f8a8b 70%, #7fdfff 100%)",
-            color: "#fff",
-            fontWeight: 600,
-            borderRadius: 16,
-            margin: 0,
-            alignSelf: "center",
-            boxShadow: "0 3px 14px #4f8a8b29",
-            minWidth: 40,
-            minHeight: 36,
-          }}
-        >
-          {theme === "light" ? "🌙" : "☀️"}
-        </button>
+      <div className="sq-topbar-blur" style={{zIndex: 11}}>
+        <div className="sq-action-buttons sq-topbar-actions" role="group" aria-label="Top right actions">
+          {/* Export CSV button */}
+          <button
+            className="sq-dashboard-export-btn sq-topbar-btn"
+            onClick={handleExportCsv}
+            title="Export group expense & payment history CSV"
+            tabIndex={0}
+          >
+            Export CSV
+          </button>
+          {/* Dark mode toggle, vertically centered and matching Export */}
+          <button
+            className={`theme-toggle sq-topbar-btn${theme === "dark" ? " theme-toggle--dark" : ""}`}
+            onClick={toggleTheme}
+            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            tabIndex={0}
+          >
+            {theme === "light" ? "🌙" : "☀️"}
+          </button>
+        </div>
       </div>
 
       {/* Responsive: add space for header so buttons don't occlude content */}

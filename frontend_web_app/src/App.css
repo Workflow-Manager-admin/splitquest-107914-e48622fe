@@ -196,6 +196,108 @@
   margin-right: 0;
   min-height: 44px;
 }
+
+/* ---- NEW TOPBAR for export/toggle ---- */
+.sq-topbar-blur {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  padding: 16px 16px 0 0;
+  border-radius: 16px;
+  background: rgba(28,32,47,0.23);
+  backdrop-filter: blur(11px) saturate(1.2);
+  box-shadow: 0 8px 32px rgba(32,41,75,0.13), 0 1.5px 8px #1a1e2a09;
+  z-index: 50;
+  min-width: 0;
+  min-height: 0;
+  transition: background 0.33s, box-shadow 0.22s;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+  width: auto;
+  max-width: 98vw;
+}
+.sq-topbar-actions {
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  position: relative;
+  z-index: 51;
+}
+
+/* Buttons in the topbar: shared, high border-radius, shadow, clear separation */
+.sq-topbar-btn,
+.sq-dashboard-export-btn.sq-topbar-btn,
+.theme-toggle.sq-topbar-btn {
+  border-radius: 13px !important;
+  min-height: 42px;
+  min-width: 44px;
+  box-shadow: 0 2.5px 15px #17253322, 0 1.5px 8px #346e8a13;
+  font-size: 1.05em;
+  outline: none;
+  vertical-align: middle;
+  margin: 0 !important;
+  align-self: center;
+  position: relative;
+  transition:
+    background 0.26s cubic-bezier(.23,1,.32,1),
+    color 0.18s cubic-bezier(.23,1,.32,1),
+    box-shadow 0.23s,
+    transform 0.17s cubic-bezier(.23,1,.32,1);
+  z-index: 52;
+}
+.sq-topbar-btn:focus,
+.sq-topbar-btn:focus-visible {
+  outline: 2.5px solid var(--color-accent, #FF5959);
+  box-shadow: 0 4px 16px #ff59593e, 0 1.5px 8px #2d7ef04a,
+    0 0 0 4px #FFF7E822;
+}
+.sq-topbar-btn:hover,
+.sq-dashboard-export-btn.sq-topbar-btn:hover,
+.theme-toggle.sq-topbar-btn:hover {
+  transform: scale(1.045) translateY(-2px);
+  filter: brightness(1.08) saturate(1.12);
+  box-shadow: 0 9px 32px #50dffe3a,0 2.5px 9px #458af76c;
+  opacity: 0.98;
+  background-blend-mode: lighten;
+}
+.sq-topbar-btn:active {
+  background: #346e8a !important;
+  color: #fff !important;
+  transform: scale(0.985);
+  box-shadow: 0 2.5px 8px #22243f26;
+  outline: none;
+}
+
+/* Responsive stacking for the top bar (mobile: stack controls vertically) */
+@media (max-width: 520px) {
+  .sq-topbar-blur {
+    position: absolute;
+    top: 8px;
+    right: 4.5vw;
+    left: auto;
+    padding: 10px 5vw 0 0;
+    border-radius: 15px;
+    min-width: 0;
+    max-width: 99vw;
+  }
+  .sq-topbar-actions {
+    flex-direction: column !important;
+    gap: 11px !important;
+    align-items: flex-end !important;
+    width: 100%;
+  }
+  .sq-topbar-btn {
+    min-width: 70vw;
+    max-width: 95vw;
+    width: 99%;
+    font-size: 1.09em;
+  }
+}
+
 .sq-action-buttons > * {
   margin: 0 !important;
   /* Ensure consistent height/width for all action buttons */
