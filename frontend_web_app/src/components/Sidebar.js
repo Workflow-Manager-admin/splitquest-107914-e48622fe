@@ -1,54 +1,94 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
+import {
+  FaReceipt, FaHome, FaUsers, FaMoneyBillWave, FaMedal, FaChartBar, FaBell, FaUserPlus
+} from 'react-icons/fa';
 import './Sidebar.css';
 
 // PUBLIC_INTERFACE
 export default function Sidebar() {
   /**
    * Sidebar navigation for the app.
-   * Quick links for dashboard, groups, expenses, achievements, analytics,
-   * and playful iconography.
+   * Modern flat icons, animated states, and accessible layout for a playful experience.
    */
+  const location = useLocation();
+
+  // Define sidebar items
+  const menu = [
+    {
+      path: '/',
+      exact: true,
+      icon: <FaHome size={21} />,
+      label: 'Dashboard',
+      tag: 'sq-tab-dashboard'
+    },
+    {
+      path: '/groups',
+      icon: <FaUsers size={20} />,
+      label: 'Groups',
+      tag: 'sq-tab-groups'
+    },
+    {
+      path: '/expenses',
+      icon: <FaMoneyBillWave size={20} />,
+      label: 'Expenses',
+      tag: 'sq-tab-expenses'
+    },
+    {
+      path: '/achievements',
+      icon: <FaMedal size={20} />,
+      label: 'Achievements',
+      tag: 'sq-tab-achievements'
+    },
+    {
+      path: '/analytics',
+      icon: <FaChartBar size={20} />,
+      label: 'Analytics',
+      tag: 'sq-tab-analytics'
+    },
+    {
+      path: '/notifications',
+      icon: <FaBell size={19} />,
+      label: 'Notifications',
+      tag: 'sq-tab-notifications'
+    }
+  ];
   return (
     <nav className="sq-sidebar" aria-label="Main Navigation">
-      <div className="sq-sidebar__brand">
-        <span role="img" aria-label="logo">🧾</span>
+      <div className="sq-sidebar__brand" tabIndex={0}>
+        <FaReceipt style={{ verticalAlign: "middle", marginRight: 8 }} size={25} />
         <div className="sq-sidebar__title">SplitQuest</div>
       </div>
       <ul className="sq-sidebar__nav">
-        <li>
-          <NavLink to="/" end>
-            <span role="img" aria-label="Dashboard">🏠</span> Dashboard
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/groups">
-            <span role="img" aria-label="Groups">👥</span> Groups
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/expenses">
-            <span role="img" aria-label="Expenses">💸</span> Expenses
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/achievements">
-            <span role="img" aria-label="Achievements">🏅</span> Achievements
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/analytics">
-            <span role="img" aria-label="Analytics">📊</span> Analytics
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/notifications">
-            <span role="img" aria-label="Notifications">🔔</span> Notifications
-          </NavLink>
-        </li>
+        {menu.map(item => (
+          <li key={item.label}>
+            <NavLink
+              to={item.path}
+              end={item.exact}
+              className={({ isActive }) =>
+                isActive ? `active ${item.tag}` : item.tag
+              }
+            >
+              <span className="sq-sidebar__icon">{item.icon}</span>
+              <span className="sq-sidebar__text">{item.label}</span>
+              {/* Animated accent background for active tab */}
+              {location.pathname === item.path && (
+                <span className="sq-sidebar__active-glider" aria-hidden="true" />
+              )}
+            </NavLink>
+          </li>
+        ))}
         <li className="sq-invite">
-          <NavLink to="/invite">
-            <span role="img" aria-label="Invite">➕</span> Invite Friends
+          <NavLink to="/invite" className={({ isActive }) =>
+            isActive ? "active sq-tab-invite" : "sq-tab-invite"
+          }>
+            <span className="sq-sidebar__icon">
+              <FaUserPlus size={19} />
+            </span>
+            <span className="sq-sidebar__text">Invite Friends</span>
+            {location.pathname === "/invite" && (
+              <span className="sq-sidebar__active-glider" aria-hidden="true" />
+            )}
           </NavLink>
         </li>
       </ul>

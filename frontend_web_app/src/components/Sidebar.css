@@ -1,3 +1,4 @@
+/* ========== Sidebar Overhaul: Modern, Playful, Animated ========== */
 .sq-sidebar {
   width: 230px;
   background: var(--background-light, #fff);
@@ -11,22 +12,37 @@
   top: 0;
   z-index: 40;
   transition: background 0.3s;
+  box-shadow: 0 0 15px #FFD2701a;
 }
 [data-theme="dark"] .sq-sidebar {
   background: var(--background-dark, #1A1A1A);
 }
+
 .sq-sidebar__brand {
   font-weight: bold;
-  text-align: center;
-  font-size: 1.25rem;
-  padding: 1.5rem 0;
+  text-align: left;
+  font-size: 1.38rem;
+  padding: 1.2rem 0 0.18rem 2.2rem;
   color: var(--color-primary, #4F8A8B);
   letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  outline: none;
+}
+.sq-sidebar__brand:focus {
+  outline: 2px solid var(--color-accent, #FF5959);
+}
+.sq-sidebar__brand .sq-sidebar__icon {
+  margin-right: 14px;
 }
 .sq-sidebar__title {
-  margin-top: 0.25rem;
-  font-size: 1.05rem;
+  margin-top: 0.04rem;
+  font-size: 1.16rem;
   color: var(--color-accent, #FF5959);
+  font-family: var(--header-font);
+  font-weight: 700;
+  letter-spacing: 1px;
+  margin-left: 6px;
 }
 
 .sq-sidebar__nav {
@@ -34,46 +50,198 @@
   margin: 0;
   padding: 0;
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .sq-sidebar__nav li {
-  margin: 0.5rem 0;
+  margin: 0.28rem 0;
+  position: relative;
 }
 
 .sq-sidebar__nav li a {
-  display: block;
-  padding: 0.85rem 2rem;
+  /* Use flex for icon + text spacing */
+  display: flex;
+  align-items: center;
+  gap: 1.23em;   /* icon-text spacing */
+  padding: 0.98rem 2rem 0.98rem 2.3rem;
   color: var(--color-primary, #4F8A8B);
   text-decoration: none;
   border-left: 3.5px solid transparent;
   font-weight: 500;
-  transition: background 0.2s, border-color 0.2s, color 0.2s;
-  border-radius: 0 16px 16px 0;
+  background: none;
+  position: relative;
+  user-select: none;
+  border-radius: 0 22px 22px 0;
+  cursor: pointer;
+  overflow: hidden;
+  /* Smooth transitions for background, border, color, shadow, and transform */
+  transition:
+    background 0.33s cubic-bezier(.44,1,.52,1),
+    border-color 0.21s,
+    color .19s,
+    box-shadow 0.25s cubic-bezier(.44,1,.52,1),
+    transform .23s cubic-bezier(.44,1,.52,1);
 }
-.sq-sidebar__nav li a.active, .sq-sidebar__nav li a:hover {
-  background: var(--color-secondary, #FBD46D);
+
+.sq-sidebar__nav li a .sq-sidebar__icon {
+  display: flex;
+  align-items: center;
+  min-width: 22px;
+  margin-right: 2px;
+  transition: color .22s cubic-bezier(.44,1,.52,1), transform .19s;
+}
+
+/* Animated accent colored glider for active tab */
+.sq-sidebar__active-glider {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 100%;
+  z-index: 0;
+  background:
+    linear-gradient(90deg,#FF595950 38% ,#FFD27022 100%);
+  box-shadow: 0 3px 20px #ff59591a;
+  pointer-events: none;
+  animation: sq-slide-in-glider 0.38s cubic-bezier(.44,1,.52,1);
+  border-radius: 0 22px 22px 0;
+}
+
+/* Animated transitions between tabs */
+@keyframes sq-slide-in-glider {
+  from { transform: translateX(-25px) scaleX(0.85); opacity: 0.5; }
+  to { transform: translateX(0) scaleX(1); opacity: 1; }
+}
+
+.sq-sidebar__nav li a.active, /* route is active */
+.sq-sidebar__nav li a:focus-visible {
   color: var(--color-accent, #FF5959);
+  background: var(--color-secondary, #FFF7E8);
   border-left: 3.5px solid var(--color-accent, #FF5959);
-}
-.sq-invite a {
-  color: var(--color-accent, #FF5959);
   font-weight: bold;
+  box-shadow: 0 3px 18px #FFD27011;
+  transform: translateX(2px) scale(1.01);
+  /* Playful pop for icon */
 }
+.sq-sidebar__nav li a.active .sq-sidebar__icon,
+.sq-sidebar__nav li a:focus-visible .sq-sidebar__icon {
+  color: var(--color-accent, #FF5959);
+  transform: scale(1.18) rotate(-7deg);
+}
+
+.sq-sidebar__nav li a:hover:not(.active) {
+  /* Animated playful hover: slide + highlight */
+  background: linear-gradient(90deg,#FFF4E4 71%,#FFD27018 100%);
+  color: var(--color-accent, #FF5959); 
+  border-left: 3.5px solid var(--color-accent, #FF5959);
+  box-shadow: 0 3px 12px #FFD27028;
+  transform: translateX(6px) scale(1.019);
+}
+.sq-sidebar__nav li a:hover .sq-sidebar__icon,
+.sq-sidebar__nav li a:focus .sq-sidebar__icon {
+  color: var(--color-accent, #FF5959);
+  transform: scale(1.15) rotate(-7deg);
+}
+
+.sq-sidebar__nav li a .sq-sidebar__text {
+  font-size: 1.01em;
+  line-height: 1.5;
+  font-family: inherit;
+  letter-spacing: 0.04em;
+  z-index: 2;
+  opacity: 0.98;
+  transition: color .22s cubic-bezier(.44,1,.52,1);
+}
+
+/* Invite Friends gets louder accent color always */
+.sq-invite a,
+.sq-sidebar__nav li .sq-tab-invite {
+  color: var(--color-accent, #FF5959) !important;
+  font-weight: bold;
+  font-family: var(--header-font);
+  position: relative;
+}
+.sq-invite a.active, .sq-invite a:hover {
+  background: var(--color-accent,#FF5959);
+  color: #fff !important;
+  box-shadow: 0 2px 11px #ff595969;
+}
+.sq-invite a .sq-sidebar__icon {
+  color: var(--color-accent, #FF5959);
+}
+.sq-invite a.active .sq-sidebar__icon,
+.sq-invite a:hover .sq-sidebar__icon {
+  color: #fff;
+}
+
+/* Compact sidebar on small screens (icon only) */
 @media (max-width: 900px) {
   .sq-sidebar {
-    width: 56px;
-    min-width: 56px;
-    max-width: 56px;
+    width: 65px;
+    min-width: 65px;
+    max-width: 65px;
+    padding: 0;
+    box-shadow: 0 0 6px #FFD27016;
   }
-  .sq-sidebar__nav li a, .sq-sidebar__brand {
-    font-size: 1.15rem;
-    text-align: center;
-    padding: 1rem 0.25rem;
-  }
-  .sq-sidebar__nav li a span, .sq-sidebar__brand span {
-    margin-right: 0 !important;
+  .sq-sidebar__brand {
+    justify-content: center;
+    padding: 1.2rem 0 0.2rem 0;
+    font-size: 1.05rem;
   }
   .sq-sidebar__title {
     display: none;
   }
+  .sq-sidebar__nav li a,
+  .sq-sidebar__nav li .sq-tab-invite {
+    font-size: 0 !important;
+    padding: 1.1rem 0.25rem 1.1rem 0.25rem;
+    justify-content: center;
+  }
+  .sq-sidebar__icon {
+    margin: 0;
+    font-size: 23px !important;
+  }
+  .sq-sidebar__nav li a .sq-sidebar__text,
+  .sq-invite a .sq-sidebar__text {
+    display: none;
+  }
+}
+
+/* Mobile: sidebar becomes a horizontal top bar */
+@media (max-width: 600px) {
+  .sq-sidebar {
+    position: fixed;
+    left: 0; top: 0; right: 0;
+    width: 100vw;
+    min-width: 0;
+    max-width: 100vw;
+    flex-direction: row !important;
+    height: 49px !important;
+    min-height: 49px !important;
+    z-index: 5001;
+    background: var(--bg-primary);
+    box-shadow: 0 3px 14px #4f8a8b10;
+    padding: 0 2vw 0 0;
+    overflow-x: auto;
+  }
+  .sq-sidebar__nav {
+    flex-direction: row !important;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    width: 97vw;
+  }
+  .sq-sidebar__nav li, .sq-sidebar__brand, .sq-sidebar__title {
+    margin: 0 7px 0 0 !important;
+    padding: 0 !important;
+    display: inline-block !important;
+    font-size: 1rem !important;
+  }
+  .sq-sidebar__title {
+    display: none !important;
+  }
+}
+
+/* Extra: smoothen the shadow accent for playful look */
+.sq-sidebar, .sq-sidebar__brand {
+  box-shadow: 0 0.5px 16px #FFD2700f;
 }
