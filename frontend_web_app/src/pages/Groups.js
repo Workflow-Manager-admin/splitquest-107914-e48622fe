@@ -123,7 +123,7 @@ function CreateGroupForm({ addGroup, onDone }) {
     } else if (numMembers < members.length) {
       setMembers((prev) => prev.slice(0, numMembers));
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numMembers]);
 
   function handleMemberChange(idx, field, value) {
@@ -154,28 +154,115 @@ function CreateGroupForm({ addGroup, onDone }) {
     if (onDone) onDone();
   }
 
+  // Responsive inline style helpers
+  const formWrapperStyle = {
+    background: "#f8f9fa",
+    padding: "1.25rem",
+    borderRadius: 15,
+    marginBottom: 18,
+    maxWidth: 520,
+    boxShadow: "0 1.5px 10px #4f8a8b12",
+    border: "1px solid #ececec",
+    display: "flex",
+    flexDirection: "column",
+    gap: 0,
+    // Adapt padding/margin for mobile
+  };
+
+  const inputRowStyle = {
+    marginBottom: 10,
+    display: "flex",
+    flexWrap: "wrap",
+    alignItems: "center",
+    gap: 8,
+  };
+
+  const memberRowStyle = {
+    display: "flex",
+    alignItems: "center",
+    flexWrap: "wrap",
+    marginBottom: 4,
+    gap: 8
+  };
+
+  const buttonRowStyle = {
+    marginTop: 17,
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+    gap: 15,
+    flexWrap: "wrap"
+  };
+
+  // Responsive: full width on small screens
+  const responsiveButtonStyle = {
+    fontWeight: 700,
+    fontSize: "1.11rem",
+    padding: "13px 0",
+    borderRadius: "13px",
+    minWidth: 140,
+    background: "var(--color-accent,#FF5959)",
+    color: "#fff",
+    boxShadow: "0 3px 18px #ff595928,0 1.5px 7px #4f8a8b16",
+    border: "none",
+    letterSpacing: "0.01em",
+    transition: "background 0.25s, box-shadow 0.19s, transform 0.15s",
+    marginTop: 0,
+    marginBottom: 0,
+    cursor: "pointer"
+  };
+
+  // Apply colorful shadow and slight hover pop for primary action
+  const createGroupBtnHover = {
+    filter: "brightness(1.07)",
+    boxShadow: "0 7px 30px #ff595950,0 2px 11px #4f8a8b1c",
+    transform: "scale(1.033) translateY(-2.5px)"
+  };
+
+  // Responsive (CSS-in-JS media queries for fine tuning)
+  const mobileMedia =
+    "@media (max-width: 600px) { .sq-groupform-btn { width: 100% !important; min-width: 0 !important; font-size: 1.07rem; padding: 16px 0; } }";
+
+  // Mount responsive style to head if not present (only once)
+  React.useEffect(() => {
+    const id = "group-create-mobile-style";
+    if (typeof document !== "undefined" && !document.getElementById(id)) {
+      const style = document.createElement("style");
+      style.id = id;
+      style.innerHTML = mobileMedia;
+      document.head.appendChild(style);
+    }
+  }, []);
+
   return (
     <form
       onSubmit={handleSubmit}
-      style={{
-        background: "#f8f9fa",
-        padding: "1rem",
-        borderRadius: 13,
-        marginBottom: 16,
-      }}
+      style={formWrapperStyle}
+      autoComplete="off"
+      aria-label="Create group form"
     >
-      <div style={{ marginBottom: 10 }}>
+      <div style={inputRowStyle}>
         <input
           required
           placeholder="Group Name"
           value={groupName}
           onChange={(e) => setGroupName(e.target.value)}
-          style={{ marginRight: 10, width: 200 }}
+          style={{
+            width: 200,
+            marginRight: 10,
+            border: "1.5px solid #dadada",
+            borderRadius: 7,
+            padding: "8px",
+            fontSize: "1.02em",
+            flex: "1 0 150px",
+            background: "#fff"
+          }}
         />
       </div>
-      <div style={{ marginBottom: 10 }}>
-        <label>
-          <b>Number of Members:</b>
+      <div style={inputRowStyle}>
+        <label style={{fontWeight: 500}}>
+          Number of Members:
           <input
             type="number"
             min={2}
@@ -187,7 +274,15 @@ function CreateGroupForm({ addGroup, onDone }) {
               if (val > 20) val = 20; // Arbitrary max for sanity
               setNumMembers(val);
             }}
-            style={{ marginLeft: 10, width: 60 }}
+            style={{
+              marginLeft: 10,
+              width: 60,
+              border: "1.5px solid #dadada",
+              borderRadius: 6,
+              padding: "6px",
+              fontSize: "1.01em",
+              background: "#fff"
+            }}
             required
           />
         </label>
@@ -197,9 +292,17 @@ function CreateGroupForm({ addGroup, onDone }) {
         <b>Members:</b>
         <div>
           {Array.from({ length: numMembers }).map((_, idx) => (
-            <div key={idx} style={{ display: "flex", alignItems: "center", marginBottom: 4 }}>
+            <div key={idx} style={memberRowStyle}>
               <input
-                style={{ marginRight: 6, width: 160 }}
+                style={{
+                  marginRight: 6,
+                  width: 160,
+                  border: "1.5px solid #dadada",
+                  borderRadius: 7,
+                  padding: "8px",
+                  fontSize: "1.00em",
+                  background: "#fff"
+                }}
                 placeholder="Name"
                 required
                 value={members[idx]?.name || ""}
@@ -207,7 +310,15 @@ function CreateGroupForm({ addGroup, onDone }) {
                 data-testid={`member-name-input-${idx}`}
               />
               <input
-                style={{ marginRight: 6, width: 120 }}
+                style={{
+                  marginRight: 6,
+                  width: 120,
+                  border: "1.5px solid #dadada",
+                  borderRadius: 7,
+                  padding: "8px",
+                  fontSize: "1.00em",
+                  background: "#fff"
+                }}
                 placeholder="Phone (optional)"
                 value={members[idx]?.number || ""}
                 onChange={e => handleMemberChange(idx, "number", e.target.value)}
@@ -218,15 +329,47 @@ function CreateGroupForm({ addGroup, onDone }) {
               />
             </div>
           ))}
-          {/* Add/Remove buttons are not needed; number controlled above */}
         </div>
       </div>
       {error && (
         <div style={{ color: "#FF5959", marginBottom: 6 }}>{error}</div>
       )}
-      <button className="theme-toggle" type="submit" style={{ marginTop: 6 }}>
-        Create Group
-      </button>
+      <div style={buttonRowStyle}>
+        <button
+          className="sq-groupform-btn"
+          type="submit"
+          style={responsiveButtonStyle}
+          onMouseOver={e => {
+            // Slight shadow pop on hover for prominence
+            Object.assign(e.currentTarget.style, createGroupBtnHover);
+          }}
+          onMouseOut={e => {
+            // Restore original style on mouse out
+            Object.keys(createGroupBtnHover).forEach(k =>
+              e.currentTarget.style[k] = responsiveButtonStyle[k] || ""
+            );
+          }}
+        >
+          Create Group
+        </button>
+        {onDone && (
+          <button
+            type="button"
+            className="sq-groupform-btn"
+            style={{
+              ...responsiveButtonStyle,
+              background: "var(--color-primary,#4F8A8B)", // secondary color
+              color: "#fff",
+              minWidth: 100,
+              boxShadow: "0 2px 8px #4f8a8b16",
+              marginLeft: 5
+            }}
+            onClick={onDone}
+          >
+            Cancel
+          </button>
+        )}
+      </div>
     </form>
   );
 }
